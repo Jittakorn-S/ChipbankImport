@@ -1,0 +1,75 @@
+﻿<Window x:Class="ChipbankImport.CustomMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Height="150"
+        Width="300"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        ResizeMode="CanResize"
+        UseLayoutRounding="True"
+        SizeToContent="Width"
+        WindowStartupLocation="CenterScreen">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+    <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
+                         UniformCornerRadius="15"
+                         materialDesign:ElevationAssist.Elevation="Dp4"
+                         MouseDown="Card_MouseDown">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.ColumnSpan="3">
+                <DockPanel VerticalAlignment="Center"
+                           Margin="0 15 0 0">
+                    <TextBlock HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Margin="20 0 0 0"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Text="Alarm" />
+                </DockPanel>
+                <Grid>
+                    <StackPanel Margin="0 10 0 0">
+                        <Label x:Name="AlarmText"
+                               Content="Get text from function"
+                               Margin="0 0 0 10"
+                               FontSize="16"
+                               HorizontalAlignment="Center" />
+                        <Button x:Name="AlarmOK"
+                                Width="100"
+                                Content="OK"
+                                Style="{StaticResource MaterialDesignPaperLightButton}"
+                                Click="AlarmOK_Click" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+            <materialDesign:ColorZone Grid.Column="2"
+                                      CornerRadius="0 15 15 0"
+                                      Height="50">
+                <DockPanel>
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            materialDesign:RippleAssist.Feedback="LightPink"
+                            Foreground="OrangeRed"
+                            materialDesign:ButtonAssist.CornerRadius="6"
+                            DockPanel.Dock="Right"
+                            HorizontalAlignment="Right"
+                            x:Name="ExitAlarm"
+                            VerticalAlignment="Center"
+                            Click="ExitAlarm_Click">
+                        <materialDesign:PackIcon Kind="CloseBold" />
+                    </Button>
+                </DockPanel>
+            </materialDesign:ColorZone>
+        </Grid>
+    </materialDesign:Card>
+</Window>

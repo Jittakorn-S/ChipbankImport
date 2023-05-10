@@ -1,0 +1,102 @@
+﻿<Window x:Class="ChipbankImport.ModalFD"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Height="450"
+        Width="800"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        ResizeMode="CanResize"
+        UseLayoutRounding="True"
+        WindowStartupLocation="CenterScreen">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+    <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
+                         UniformCornerRadius="15"
+                         materialDesign:ElevationAssist.Elevation="Dp4"
+                         MouseDown="FDModal_MouseDown">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Margin="160,13,141,0"
+                        Grid.ColumnSpan="4">
+                <DockPanel Margin="0 10 0 0">
+                    <TextBlock HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Margin="0 15 0 0"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Text="FD Sheet Data" />
+                </DockPanel>
+                <Grid>
+                    <materialDesign:ColorZone Grid.Column="0"
+                                              Mode="Custom"
+                                              Background="White"
+                                              Foreground="Black"
+                                              CornerRadius="15"
+                                              Padding="55"
+                                              Margin="0 20 0 0"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Stretch">
+                        <StackPanel>
+                            <StackPanel>
+                                <TextBox x:Name="InvoiceTextbox"
+                                         materialDesign:HintAssist.Hint="Invoice No."
+                                         MaxWidth="400"
+                                         IsEnabled="False"
+                                         FontSize="20"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         Loaded="InvoiceTextbox_Loaded" />
+                                <TextBox x:Name="LotNoTextbox"
+                                         materialDesign:HintAssist.Hint="LOT"
+                                         MaxWidth="400"
+                                         IsEnabled="False"
+                                         Margin="0 20 0 0"
+                                         FontSize="20"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </materialDesign:ColorZone>
+                </Grid>
+                <StackPanel>
+                    <Button x:Name="UploadButton"
+                            Margin="0 20 0 0"
+                            Content="Upload"
+                            Width="300"
+                            Height="50"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Style="{StaticResource MaterialDesignPaperLightButton}"
+                             />
+                </StackPanel>
+            </StackPanel>
+            
+            <materialDesign:ColorZone Grid.Column="3"
+                                      CornerRadius="0 15 15 0"
+                                      Height="50">
+                <DockPanel>
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            materialDesign:RippleAssist.Feedback="LightPink"
+                            Foreground="OrangeRed"
+                            materialDesign:ButtonAssist.CornerRadius="6"
+                            DockPanel.Dock="Right"
+                            HorizontalAlignment="Right"
+                            x:Name="ExitModalFD"
+                            VerticalAlignment="Center"
+                            Click="exitModal_Click">
+                        <materialDesign:PackIcon Kind="CloseBold" />
+                    </Button>
+                </DockPanel>
+            </materialDesign:ColorZone>
+        </Grid>
+    </materialDesign:Card>
+</Window>
