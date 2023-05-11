@@ -24,6 +24,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Shell;
+using static ChipbankImport.MainWindow;
 using static System.Net.WebRequestMethods;
 using File = System.IO.File;
 
@@ -34,7 +35,11 @@ namespace ChipbankImport
     /// </summary>
     public partial class MainWindow : Window
     {
-        static CustomMessageBox? CustomMessageBox;
+        private static CustomMessageBox? CustomMessageBox;
+        private static string? TmpData;
+        private static string? useqno;
+        private static string? finseqno;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -154,11 +159,7 @@ namespace ChipbankImport
                             InvoiceNo = ReadlineText.Substring(86, 7);
                             LotCount = LotCount + 1;
                         }
-                        streamReader.Close();
-                        streamReader.Dispose();
                     }
-                    fileStream.Close();
-                    fileStream.Dispose();
                 }
                 DataFDSheet(ProcessPath + @"\FD\Refidc02.fd"); /*Prepare Data*/
                 ModalFD Modalfd = new ModalFD();
@@ -172,6 +173,27 @@ namespace ChipbankImport
             }
 
         }
+        public struct WaferData
+        {
+            public string ActualNo;
+            public string WFLotNo;
+            public string RFSeqNo;
+            public string ChipModelName;
+            public string ModelCode1;
+            public string ModelCode2;
+            public string RohmModelName;
+            public string InvoiceNo;
+            public string CaseNo;
+            public string Box;
+            public string OutDiv;
+            public string RecDiv;
+            public string OrderNo;
+            public string ControlCode;
+            public string PayClass;
+            public string WFCount;
+            public string ChipCount;
+            public string WaferDATA;
+        }
         public static void DataFDSheet(string GetProcessPath)
         {
             string? ReadlineTextFD = null;
@@ -183,47 +205,50 @@ namespace ChipbankImport
                     {
                         while ((ReadlineTextFD = streamReader.ReadLine()) != null)
                         {
-                            string ACTULNO = ReadlineTextFD.Substring(0, 10);
-                            string WFLOTNO = ReadlineTextFD.Substring(10, 11);
-                            string RFSEQNO = ReadlineTextFD.Substring(22, 10);
-                            string CHIPMODELNAME = ReadlineTextFD.Substring(32, 13);
-                            string MODELCODE1 = ReadlineTextFD.Substring(52, 8);
-                            string MODELCODE2 = ReadlineTextFD.Substring(60, 6);
-                            string ROHMMODELNAME = ReadlineTextFD.Substring(66, 14);
-                            string INVOICENo = ReadlineTextFD.Substring(86, 7);
-                            string CASENO = ReadlineTextFD.Substring(94, 6);
-                            string BOX = ReadlineTextFD.Substring(100, 7);
-                            string OUTDIV = ReadlineTextFD.Substring(110, 5);
-                            string RECDIV = ReadlineTextFD.Substring(115, 5);
-                            string ORDERNO = ReadlineTextFD.Substring(120, 12);
-                            string CONTROLCODE = ReadlineTextFD.Substring(135, 7);
-                            string PAYCLASS = ReadlineTextFD.Substring(144, 1);
-                            string WFCOUNT = ReadlineTextFD.Substring(143, 2);
-                            string CHIPCOUNT = ReadlineTextFD.Substring(147, 5);
-                            string WAFERDATA = ReadlineTextFD.Substring(154, 358);
+                            WaferData waferData = new WaferData
+                            {
+                                ActualNo = ReadlineTextFD.Substring(0, 10),
+                                WFLotNo = ReadlineTextFD.Substring(10, 11),
+                                RFSeqNo = ReadlineTextFD.Substring(22, 10),
+                                ChipModelName = ReadlineTextFD.Substring(32, 20),
+                                ModelCode1 = ReadlineTextFD.Substring(52, 8),
+                                ModelCode2 = ReadlineTextFD.Substring(60, 6),
+                                RohmModelName = ReadlineTextFD.Substring(66, 14),
+                                InvoiceNo = ReadlineTextFD.Substring(86, 7),
+                                CaseNo = ReadlineTextFD.Substring(94, 6),
+                                Box = ReadlineTextFD.Substring(100, 7),
+                                OutDiv = ReadlineTextFD.Substring(110, 5),
+                                RecDiv = ReadlineTextFD.Substring(115, 5),
+                                OrderNo = ReadlineTextFD.Substring(120, 12),
+                                ControlCode = ReadlineTextFD.Substring(135, 7),
+                                PayClass = ReadlineTextFD.Substring(144, 1),
+                                WFCount = ReadlineTextFD.Substring(143, 2),
+                                ChipCount = ReadlineTextFD.Substring(147, 5),
+                                WaferDATA = ReadlineTextFD.Substring(154, 358)
+                            };
 
                             SET_WAFER(ReadlineTextFD);
                             SETSEQ();
+                            STOCKINDATA(waferData);
                         }
-                        streamReader.Close();
-                        streamReader.Dispose();
                     }
-                    fileStream.Close();
-                    fileStream.Dispose();
                 }
             }
-
+            else
+            {
+                AlarmBox("Data not exist check Refidc02.fd !!!");
+            }
         }
         public static void SET_WAFER(string GetReadlineTextFD)
         {
             int POS = 152;
             int POS2 = 155;
-            string? TmpData = null;
             for (int i = 0; i <= 39; i++)
             {
                 if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length != 0)
                 {
                     string WFSEQ = GetReadlineTextFD.Substring(POS + (9 * i), 3);
+
                     string waferchipcount = GetReadlineTextFD.Substring(POS2 + (9 * i), 6);
                     //SET_WF_SEQ
                     if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 1)
@@ -269,57 +294,78 @@ namespace ChipbankImport
                 else
                 {
                     AlarmBox("Can not read data check Refidc02.fd !!!");
+                    break;
                 }
             }
         }
-        public static void STOCKINDATA(string GetTmpData)
+        public static void STOCKINDATA(WaferData GetwaferData)
         {
             string TIMESTAMP = DateTime.Now.ToString();
-            string? tmpdata1 = null, tmpdata2 = null;
-            tmpdata1 = GetTmpData.Substring(0, 180);
-            tmpdata2 = GetTmpData.Substring(181, 180);
-
-            //    sql = "INSERT CHIPNYUKO(CHIPMODELNAME,MODELCODE1,MODELCODE2,WFLOTNO,SEQNO,"
-            //sql = sql & "OUTDIV,RECDIV,STOCKDATE,WFCOUNT,CHIPCOUNT,ORDERNO,INVOICENO,CASENO,"
-            //sql = sql & "WFDATA1,WFDATA2,WFINPUT,TIMESTAMP,RFSEQNO) VALUES('"
-            //sql = sql & CHIPMODELNAME & "','"
-            //sql = sql & MODELCODE1 & "','"
-            //sql = sql & MODELCODE2 & "','"
-            //sql = sql & WFLOTNO & "','"
-            //sql = sql & finseqno & "','"
-            //sql = sql & OUTDIV & "','"
-            //sql = sql & RECDIV & "','"
-            //sql = sql & Now.ToString("yyMMdd") & "',"
-            //sql = sql & WFCOUNT & ","
-            //sql = sql & CHIPCOUNT & ",'"
-            //sql = sql & ORDERNO & "','"
-            //sql = sql & INVOICENo & "','"
-            //sql = sql & CASENO & "','"
-            //sql = sql & tmpdata1 & "','" & tmpdata2 & "','1','" & TIMESTAMP & "','" & RF_SEQNO & "');"
-
-
-            //    Dim myCmd As New SqlCommand(sql, CN1)
-
-            //myCmd.Connection.Open()
-            //myCmd.ExecuteNonQuery()
-            //myCmd.Connection.Close()
-
-            //sql = "UPDATE CHIPNYUKO SET PLASMA=(SELECT PLASMA FROM CHIPMASTER " & _
-            //            "Where CHIPMODELNAME='" & CHIPMODELNAME & "' AND PLASMA='1') " & _
-            //        "WHERE WFLOTNO='" & WFLOTNO & "' AND SEQNO='" & finseqno & "'"
-
-            //Dim myCmd2 As New SqlCommand(sql, CN1)
-
-            //myCmd2.Connection.Open()
-            //myCmd2.ExecuteNonQuery()
-            //myCmd2.Connection.Close()
+            string STOCKDATE = DateTime.Now.ToString("yyMMdd");
+            string WFDATA1 = TmpData!.Substring(0, 180);
+            string WFDATA2 = TmpData!.Substring(180, 180);
+            string ReWFDATA1 = WFDATA1.Replace("  0", "   ");
+            string ReWFDATA2 = WFDATA2.Replace("  0", "   ");
+            string ConnetionString = ConfigurationManager.AppSettings["ConnetionString"]!;
+            string sqlInsert = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, OUTDIV," +
+                               " RECDIV, STOCKDATE, WFCOUNT, CHIPCOUNT, SLIPNO, SLIPNOEDA, ORDERNO, INVOICENO, HOLDFLAG, CASENO, WFDATA1, WFDATA2, WFINPUT, " +
+                               "TIMESTAMP, RFSEQNO) " +
+                               "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @OUTDIV, @RECDIV, @STOCKDATE, @WFCOUNT, " +
+                               "@CHIPCOUNT, @SLIPNO, @SLIPNOEDA, @ORDERNO, @INVOICENo, @HOLDFLAG, @CASENO, @tmpdata1, @tmpdata2, @WFINPUT, @TIMESTAMP, @RF_SEQNO)";
+            string sqlUpdate = "UPDATE CHIPNYUKO SET PLASMA = (SELECT PLASMA FROM CHIPMASTER Where CHIPMODELNAME = @CHIPMODELNAME AND PLASMA = '1') " +
+                               "WHERE WFLOTNO = @WFLOTNO AND SEQNO = @finseqno";
+            using (SqlConnection connection = new SqlConnection(ConnetionString))
+            {
+                try
+                {
+                    connection.Open();
+                    SqlCommand sqlCommandQuery = new SqlCommand(sqlInsert, connection);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
+                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE1", GetwaferData.ModelCode1);
+                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE2", GetwaferData.ModelCode2);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@SEQNO", finseqno);
+                    sqlCommandQuery.Parameters.AddWithValue("@OUTDIV", GetwaferData.OutDiv);
+                    sqlCommandQuery.Parameters.AddWithValue("@RECDIV", GetwaferData.RecDiv);
+                    sqlCommandQuery.Parameters.AddWithValue("@STOCKDATE", STOCKDATE);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT", GetwaferData.WFCount);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", GetwaferData.ChipCount);
+                    sqlCommandQuery.Parameters.AddWithValue("@SLIPNO", "          ");
+                    sqlCommandQuery.Parameters.AddWithValue("@SLIPNOEDA", "  ");
+                    sqlCommandQuery.Parameters.AddWithValue("@ORDERNO", GetwaferData.OrderNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@INVOICENo", GetwaferData.InvoiceNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@HOLDFLAG", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@CASENO", GetwaferData.CaseNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@tmpdata1", ReWFDATA1);
+                    sqlCommandQuery.Parameters.AddWithValue("@tmpdata2", ReWFDATA2);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFINPUT", "1");
+                    sqlCommandQuery.Parameters.AddWithValue("@TIMESTAMP", TIMESTAMP);
+                    sqlCommandQuery.Parameters.AddWithValue("@RF_SEQNO", GetwaferData.RFSeqNo);
+                    //sqlCommandQuery.ExecuteNonQuery();
+                }
+                catch (SqlException)
+                {
+                    AlarmBox("Can not insert data or connect to the database !!!");
+                }
+                try
+                {
+                    SqlCommand sqlCommandQuery = new SqlCommand(sqlUpdate, connection);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@finseqno", finseqno);
+                    sqlCommandQuery.ExecuteNonQuery();
+                }
+                catch (SqlException)
+                {
+                    AlarmBox("Can not update data or connect to the database !!!");
+                }
+            }
         }
         public static void SETSEQ()
         {
             try
             {
                 string? ALOCATEDATE = null;
-                string? useqno = null;
                 int countSeq = 0;
                 int SEQNO = 0;
                 string ConnectionString = ConfigurationManager.AppSettings["ConnetionString"]!;
@@ -395,14 +441,14 @@ namespace ChipbankImport
                                 }
                                 catch (SqlException)
                                 {
-                                    AlarmBox("Can not connect to database !!!");
+                                    AlarmBox("Can not connect to the database !!!");
                                 }
                                 finally
                                 {
                                     connection.Close();
                                 }
                             }
-                            string finseqno = $"Q{ALOCATEDATE}{useqno}";
+                            finseqno = $"Q{ALOCATEDATE!.Substring(1, 5)}{useqno}";
                         }
                     }
                 }
