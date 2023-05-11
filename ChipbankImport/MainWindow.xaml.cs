@@ -230,6 +230,7 @@ namespace ChipbankImport
                             SET_WAFER(ReadlineTextFD);
                             SETSEQ();
                             STOCKINDATA(waferData);
+                            STOCKDATA(waferData);
                         }
                     }
                 }
@@ -456,6 +457,48 @@ namespace ChipbankImport
             catch (Exception e)
             {
                 AlarmBox(e.Message);
+            }
+        }
+        public static void STOCKDATA(WaferData GetwaferData)
+        {
+            try
+            {
+                string STOCKDATE = DateTime.Now.ToString("yyMMdd");
+                string TIMESTAMP = DateTime.Now.ToString();
+                string ConnectionString = ConfigurationManager.AppSettings["ConnetionString"]!;
+                string sqlInsert = "INSERT INTO CHIPZAIKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, LOCATION, WFCOUNT, CHIPCOUNT, STOCKDATE, " +
+                                   "RETURNFLAG, REMAINFLAG, HOLDFLAG, STAFFNO, PREOUTFLAG, INVOICENO, PROCESSCODE, DELETEFLAG, TIMESTAMP)" +
+                                   "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @ENO, @LOCATION, @WFCOUNT, @CHIPCOUNT, @STOCKDATE, " +
+                                   "@RETURNFLAG, @REMAINFLAG, @HOLDFLAG, @STAFFNO, @PREOUTFLAG, @INVOICENO, @PROCESSCODE, @DELETEFLAG, @TIMESTAMP)";
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                {
+                    connection.Open();
+                    SqlCommand sqlCommandQuery = new SqlCommand(sqlInsert, connection);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
+                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE1", GetwaferData.ModelCode1);
+                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE2", GetwaferData.ModelCode2);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@SEQNO", finseqno);
+                    sqlCommandQuery.Parameters.AddWithValue("@ENO", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@LOCATION", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT", GetwaferData.WFCount);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", GetwaferData.ChipCount);
+                    sqlCommandQuery.Parameters.AddWithValue("@STOCKDATE", STOCKDATE);
+                    sqlCommandQuery.Parameters.AddWithValue("@RETURNFLAG", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@REMAINFLAG", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@HOLDFLAG", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@STAFFNO", "00001");
+                    sqlCommandQuery.Parameters.AddWithValue("@PREOUTFLAG", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@INVOICENO", GetwaferData.InvoiceNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@PROCESSCODE", GetwaferData.RecDiv);
+                    sqlCommandQuery.Parameters.AddWithValue("@DELETEFLAG", "");
+                    sqlCommandQuery.Parameters.AddWithValue("@TIMESTAMP", TIMESTAMP);
+                    sqlCommandQuery.ExecuteNonQuery();
+                }
+            }
+            catch (SqlException)
+            {
+                AlarmBox("Can not insert data or connect to the database !!!");
             }
         }
         public static void AlarmBox(string AlarmMessage)
