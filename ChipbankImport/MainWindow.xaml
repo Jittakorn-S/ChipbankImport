@@ -16,7 +16,6 @@
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="5" />
     </WindowChrome.WindowChrome>
-
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
                          UniformCornerRadius="15"
                          materialDesign:ElevationAssist.Elevation="Dp4"

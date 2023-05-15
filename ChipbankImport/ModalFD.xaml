@@ -76,10 +76,10 @@
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center"
                             Style="{StaticResource MaterialDesignPaperLightButton}"
-                             />
+                            Click="UploadButton_Click" />
                 </StackPanel>
             </StackPanel>
-            
+
             <materialDesign:ColorZone Grid.Column="3"
                                       CornerRadius="0 15 15 0"
                                       Height="50">
