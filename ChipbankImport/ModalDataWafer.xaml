@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        MinHeight="700"
+        MinHeight="850"
         MinWidth="700"
-        MaxHeight="700"
+        MaxHeight="850"
         MaxWidth="700"
         WindowStyle="None"
         AllowsTransparency="False"
@@ -45,12 +45,18 @@
                                               Foreground="Black"
                                               CornerRadius="15"
                                               Padding="20"
-                                              Width="250"
+                                              Width="300"
                                               Margin="0,20,0,0">
                         <DataGrid x:Name="dataGridwafer"
                                   CanUserAddRows="False"
                                   SelectionMode="Extended"
                                   SelectionUnit="Cell"
+                                  FontSize="20"
+                                  CanUserDeleteRows="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeRows="False"
+                                  CanUserSortColumns="False" 
+                                  IsReadOnly="True"
                                   AutoGenerateColumns="True" />
 
                     </materialDesign:ColorZone>

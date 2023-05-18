@@ -1,29 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Data.SqlClient;
-using System.IO.Compression;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using static ChipbankImport.ModalFD;
-using System.Data.Common;
 using System.Data;
+using System.Data.Common;
+using System.Data.SqlClient;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using static ChipbankImport.ModalFD;
 
 namespace ChipbankImport
 {
     public partial class ModalSampleLot : Window
     {
         public string? zipfileName { get; set; } //from submitButton_Click MainWindow
+        private static string? fileName;
         private static string? tmpData;
         private static string? tmpwfLotno;
         private static string? tmp_invoiceNo;
@@ -35,6 +27,7 @@ namespace ChipbankImport
         private static int sumwfCount;
         private static int sumchipCount;
         private static DataTable dataWFSEQ = new DataTable();
+        private static bool isButtoncheckClicked = false;
         public ModalSampleLot()
         {
             InitializeComponent();
@@ -61,12 +54,23 @@ namespace ChipbankImport
         }
         private void UploadButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("wait code");
+            if (isButtoncheckClicked == true)
+            {
+                UpdateChipnyuko();
+                UpdateChipzaiko();
+                MoveFile(fileName!);
+                MainWindow.AlarmBox("Uploaded Successfully");
+                Close();
+            }
+            else
+            {
+                MainWindow.AlarmBox("Please click the check button first !!!");
+            }
         }
         private void checkButton_Click(object sender, RoutedEventArgs e)
         {
-            string waferText = waferLot.Text.ToString();
-            if (waferText != "")
+            string waferText = waferLot.Text.ToString().Trim('.');
+            if (waferText != "" & waferText.Count() == 11 & !waferLot.Text.Contains('.'))
             {
                 try
                 {
@@ -86,7 +90,7 @@ namespace ChipbankImport
                 {
                     MainWindow.AlarmBox("Can not connect to the database !!!");
                 }
-                string fileName = $"{waferText}.{zipfileName}.zip";
+                fileName = $"{waferText}.{zipfileName}.zip";
                 Unzip(fileName);
                 ShowValues();
             }
@@ -264,6 +268,7 @@ namespace ChipbankImport
                         if (tmpData?.Length <= 180)
                         {
                             tmpData1 = tmpData?.Substring(0, Math.Min(tmpData.Length, 180));
+                            tmpData2 = "";
                         }
                         else
                         {
@@ -351,7 +356,9 @@ namespace ChipbankImport
                 {
                     TMP_ORDERNO = tmpwfLotno;
                 }
+
                 SETSEQ();
+
                 string sqlInsertTMP_EDS = "INSERT INTO TMP_EDS (CHIPMODELNAME,WFLOTNO,WFCOUNT,CHIPCOUNT,INVOICENO,CASENO,OUTDIV,RECDIV,ORDERNO,PLASMA,WFDATA1,WFDATA2,SEQNO,WFCOUNT_FAIL) " +
                                           "VALUES (@CHIPMODELNAME, @WFLOTNO, @WFCOUNT, @CHIPCOUNT, @INVOICENO, @CASENO, @OUTDIV, @RECDIV, @ORDERNO, @PLASMA, @WFDATA1, @WFDATA2, @SEQNO, @WFCOUNT_FAIL)";
                 string ALOCATEDATE = DateTime.Now.ToString("yyMMdd");
@@ -404,6 +411,7 @@ namespace ChipbankImport
                 DataWafer dataWafer = new DataWafer();
                 dataWafer.dataGridwafer.ItemsSource = dataWFSEQ.DefaultView;
                 dataWafer.ShowDialog();
+                isButtoncheckClicked = true;
             }
             else
             {
@@ -413,18 +421,171 @@ namespace ChipbankImport
                 chipCount.Text = null;
                 lotStatus.Text = null;
                 seqNo.Text = null;
-                if (getplasmaStatus == "1")
+                plasmaStatus.Text = null;
+            }
+        }
+        private void UpdateChipnyuko()
+        {
+            string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+            string sqlSelectTMPEDS = "SELECT* FROM TMP_EDS";
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (SqlCommand sqlCommandQuery = new SqlCommand(sqlSelectTMPEDS, connection))
                 {
-                    plasmaStatus.Text = "Plasma";
+                    SqlDataReader reader = sqlCommandQuery.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        string CHIPMODELNAME = reader.GetString(0);
+                        string WFLOTNO = reader.GetString(1);
+                        int WFCOUNT = (int)reader.GetSqlDecimal(2);
+                        int CHIPCOUNT = (int)reader.GetSqlDecimal(3);
+                        string INVOICENO = reader.GetString(4);
+                        string CASENO = reader.GetString(5);
+                        string OUTDIV = reader.GetString(6);
+                        string RECDIV = reader.GetString(7);
+                        string ORDERNO = reader.GetString(8);
+                        string WFDATA1 = reader.GetString(9);
+                        string WFDATA2 = reader.GetString(10);
+                        string SEQNO = reader.GetString(11);
+                        string PLASMA = reader.GetString(12);
+                        int WFCOUNT_FAIL = (int)reader.GetSqlDecimal(13);
+
+                        string insertQuery = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, RFSEQNO, OUTDIV, RECDIV, STOCKDATE, RETURNFLAG, WFCOUNT,CHIPCOUNT, " +
+                                             "ORDERNO, HIGHREL, AGARIDATE, BUNKAN, RETURNCLASS, SLIPNO, SLIPNOEDA,STAFFNO, WFINPUT, TESTERNO, PROGRAMVER,RECYCLE, RINGNO, INVOICENO, HOLDFLAG,CASENO, " +
+                                             "DIRECTCLASS, DELETEFLAG, WFDATA1, WFDATA2, TIMESTAMP, MOVE_ORDERNO, PLASMA,WFCOUNT_FAIL) " +
+                                             "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @ENO, @RFSEQNO, @OUTDIV, @RECDIV, @STOCKDATE, @RETURNFLAG, @WFCOUNT,@CHIPCOUNT, @ORDERNO, @HIGHREL, " +
+                                             "@AGARIDATE, @BUNKAN, @RETURNCLASS, @SLIPNO, @SLIPNOEDA, @STAFFNO, @WFINPUT, @TESTERNO, @PROGRAMVER, @RECYCLE, @RINGNO, @INVOICENO, @HOLDFLAG, @CASENO, @DIRECTCLASS, @DELETEFLAG, " +
+                                             "@WFDATA1, @WFDATA2, @TIMESTAMP, @MOVE_ORDERNO, @PLASMA, @WFCOUNT_FAIL)";
+                        using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
+                        {
+                            // Set the parameter values
+                            insertCommand.Parameters.AddWithValue("@CHIPMODELNAME", CHIPMODELNAME);
+                            insertCommand.Parameters.AddWithValue("@MODELCODE1", "");
+                            insertCommand.Parameters.AddWithValue("@MODELCODE2", "");
+                            insertCommand.Parameters.AddWithValue("@WFLOTNO", WFLOTNO);
+                            insertCommand.Parameters.AddWithValue("@SEQNO", SEQNO);
+                            insertCommand.Parameters.AddWithValue("@ENO", "");
+                            insertCommand.Parameters.AddWithValue("@RFSEQNO", "");
+                            insertCommand.Parameters.AddWithValue("@OUTDIV", OUTDIV);
+                            insertCommand.Parameters.AddWithValue("@RECDIV", RECDIV);
+                            insertCommand.Parameters.AddWithValue("@STOCKDATE", DateTime.Now.ToString("yyMMdd"));
+                            insertCommand.Parameters.AddWithValue("@RETURNFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@WFCOUNT", WFCOUNT);
+                            insertCommand.Parameters.AddWithValue("@CHIPCOUNT", CHIPCOUNT);
+                            insertCommand.Parameters.AddWithValue("@ORDERNO", ORDERNO);
+                            insertCommand.Parameters.AddWithValue("@HIGHREL", "");
+                            insertCommand.Parameters.AddWithValue("@AGARIDATE", DateTime.Now.ToString("yyMMdd"));
+                            insertCommand.Parameters.AddWithValue("@BUNKAN", "");
+                            insertCommand.Parameters.AddWithValue("@RETURNCLASS", "");
+                            insertCommand.Parameters.AddWithValue("@SLIPNO", "");
+                            insertCommand.Parameters.AddWithValue("@SLIPNOEDA", "");
+                            insertCommand.Parameters.AddWithValue("@STAFFNO", "001");
+                            insertCommand.Parameters.AddWithValue("@WFINPUT", "");
+                            insertCommand.Parameters.AddWithValue("@TESTERNO", "");
+                            insertCommand.Parameters.AddWithValue("@PROGRAMVER", "");
+                            insertCommand.Parameters.AddWithValue("@RECYCLE", "");
+                            insertCommand.Parameters.AddWithValue("@RINGNO", "");
+                            insertCommand.Parameters.AddWithValue("@INVOICENO", INVOICENO);
+                            insertCommand.Parameters.AddWithValue("@HOLDFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@CASENO", CASENO);
+                            insertCommand.Parameters.AddWithValue("@DIRECTCLASS", "");
+                            insertCommand.Parameters.AddWithValue("@DELETEFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@WFDATA1", WFDATA1);
+                            insertCommand.Parameters.AddWithValue("@WFDATA2", WFDATA2);
+                            insertCommand.Parameters.AddWithValue("@TIMESTAMP", DateTime.Now.ToString());
+                            insertCommand.Parameters.AddWithValue("@MOVE_ORDERNO", "");
+                            insertCommand.Parameters.AddWithValue("@PLASMA", PLASMA);
+                            insertCommand.Parameters.AddWithValue("@WFCOUNT_FAIL", WFCOUNT_FAIL);
+                            //insertCommand.ExecuteNonQuery();
+                        }
+                    }
+                    reader.Close();
                 }
-                else if (getplasmaStatus == "0")
+            }
+        }
+        private void UpdateChipzaiko()
+        {
+            string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+            string sqlSelectTMPEDS = "SELECT* FROM TMP_EDS";
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (SqlCommand sqlCommandQuery = new SqlCommand(sqlSelectTMPEDS, connection))
                 {
-                    plasmaStatus.Text = "No Plasma";
+                    SqlDataReader reader = sqlCommandQuery.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        string CHIPMODELNAME = reader.GetString(0);
+                        string WFLOTNO = reader.GetString(1);
+                        int WFCOUNT = (int)reader.GetSqlDecimal(2);
+                        int CHIPCOUNT = (int)reader.GetSqlDecimal(3);
+                        string INVOICENO = reader.GetString(4);
+                        string CASENO = reader.GetString(5);
+                        string OUTDIV = reader.GetString(6);
+                        string RECDIV = reader.GetString(7);
+                        string ORDERNO = reader.GetString(8);
+                        string WFDATA1 = reader.GetString(9);
+                        string WFDATA2 = reader.GetString(10);
+                        string SEQNO = reader.GetString(11);
+                        string PLASMA = reader.GetString(12);
+                        int WFCOUNT_FAIL = (int)reader.GetSqlDecimal(13);
+
+                        string insertQuery = "INSERT INTO CHIPZAIKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, LOCATION, WFCOUNT, CHIPCOUNT, STOCKDATE, RETURNFLAG, REMAINFLAG, HOLDFLAG, STAFFNO, PREOUTFLAG, INVOICENO, PROCESSCODE, DELETEFLAG, TIMESTAMP) " +
+                                             "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @ENO, @LOCATION, @WFCOUNT, @CHIPCOUNT, @STOCKDATE, @RETURNFLAG, @REMAINFLAG, @HOLDFLAG, @STAFFNO, @PREOUTFLAG, @INVOICENO, @PROCESSCODE, @DELETEFLAG, @TIMESTAMP)";
+                        using (SqlCommand insertCommand = new SqlCommand(insertQuery, connection))
+                        {
+                            // Set the parameter values
+                            insertCommand.Parameters.AddWithValue("@CHIPMODELNAME", CHIPMODELNAME);
+                            insertCommand.Parameters.AddWithValue("@MODELCODE1", "");
+                            insertCommand.Parameters.AddWithValue("@MODELCODE2", "");
+                            insertCommand.Parameters.AddWithValue("@WFLOTNO", WFLOTNO);
+                            insertCommand.Parameters.AddWithValue("@SEQNO", SEQNO);
+                            insertCommand.Parameters.AddWithValue("@ENO", "");
+                            insertCommand.Parameters.AddWithValue("@LOCATION", "");
+                            insertCommand.Parameters.AddWithValue("@WFCOUNT", WFCOUNT);
+                            insertCommand.Parameters.AddWithValue("@CHIPCOUNT", CHIPCOUNT);
+                            insertCommand.Parameters.AddWithValue("@STOCKDATE", DateTime.Now.ToString("yyMMdd"));
+                            insertCommand.Parameters.AddWithValue("@RETURNFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@REMAINFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@HOLDFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@STAFFNO", "001");
+                            insertCommand.Parameters.AddWithValue("@PREOUTFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@INVOICENO", "");
+                            insertCommand.Parameters.AddWithValue("@PROCESSCODE", "TI970");
+                            insertCommand.Parameters.AddWithValue("@DELETEFLAG", "");
+                            insertCommand.Parameters.AddWithValue("@TIMESTAMP", DateTime.Now.ToString());
+                            insertCommand.ExecuteNonQuery();
+                        }
+                    }
+                    reader.Close();
                 }
-                else
+            }
+        }
+        private void MoveFile(string getFileName)
+        {
+            string? FileToCopy = ConfigurationManager.AppSettings["CBOutputPath"] + getFileName; /*Shared Folder*/
+            string? CopytoPath = ConfigurationManager.AppSettings["CopytoPath"]!; /*Backup Folder*/
+            string? ExtractPath = ConfigurationManager.AppSettings["ExtractPath"]!; /*Extract Folder*/
+            string destinationFilePath = System.IO.Path.Combine(CopytoPath, fileName!);
+            string fileamenotExtension = System.IO.Path.GetFileNameWithoutExtension(FileToCopy);
+            int fileLotname = fileamenotExtension.IndexOf('.');
+            string LotNo = fileamenotExtension.Substring(0, fileLotname);
+            if (File.Exists(FileToCopy))
+            {
+                try
                 {
-                    plasmaStatus.Text = null;
+                    ZipFile.ExtractToDirectory(FileToCopy, ExtractPath + LotNo);
+                    File.Move(FileToCopy, destinationFilePath, true);
                 }
+                catch (Exception)
+                {
+                    MainWindow.AlarmBox("Not found zip file in the CBOutput location !!!");
+                }
+            }
+            else
+            {
+                MainWindow.AlarmBox("Not found zip file in the CBOutput location !!!");
             }
         }
     }

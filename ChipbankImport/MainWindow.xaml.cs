@@ -3,9 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using static ChipbankImport.ModalFD;
 
 namespace ChipbankImport
 {
@@ -77,7 +75,8 @@ namespace ChipbankImport
                     {
                         UnzipSampleLot(sampleLot);
                     }
-                } else if (CountText == 14)
+                }
+                else if (CountText == 14)
                 {
                     ModalSampleLot modalSampleLot = new ModalSampleLot();
                     modalSampleLot.zipfileName = TextInputBarcode.Text;
