@@ -1,5 +1,4 @@
-﻿using ChipbankImport;
-using System;
+﻿using System;
 using System.Configuration;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -190,7 +189,7 @@ namespace ChipbankImport
                 string? ALOCATEDATE = null;
                 int countSeq = 0;
                 int SEQNO = 0;
-                string ConnectionString = ConfigurationManager.AppSettings["ConnetionString"]!;
+                string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
                 using (SqlConnection connection = new SqlConnection(ConnectionString))
                 {
                     connection.Open();
@@ -288,7 +287,7 @@ namespace ChipbankImport
             string WFDATA2 = TmpData!.Substring(180, 180);
             string ReWFDATA1 = WFDATA1.Replace("  0", "   ");
             string ReWFDATA2 = WFDATA2.Replace("  0", "   ");
-            string ConnetionString = ConfigurationManager.AppSettings["ConnetionString"]!;
+            string ConnetionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
             string sqlInsert = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, OUTDIV," +
                                " RECDIV, STOCKDATE, WFCOUNT, CHIPCOUNT, SLIPNO, SLIPNOEDA, ORDERNO, INVOICENO, HOLDFLAG, CASENO, WFDATA1, WFDATA2, WFINPUT, " +
                                "TIMESTAMP, RFSEQNO) " +
@@ -349,7 +348,7 @@ namespace ChipbankImport
             {
                 string STOCKDATE = DateTime.Now.ToString("yyMMdd");
                 string TIMESTAMP = DateTime.Now.ToString();
-                string ConnectionString = ConfigurationManager.AppSettings["ConnetionString"]!;
+                string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
                 string sqlInsert = "INSERT INTO CHIPZAIKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, LOCATION, WFCOUNT, CHIPCOUNT, STOCKDATE, " +
                                    "RETURNFLAG, REMAINFLAG, HOLDFLAG, STAFFNO, PREOUTFLAG, INVOICENO, PROCESSCODE, DELETEFLAG, TIMESTAMP)" +
                                    "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @ENO, @LOCATION, @WFCOUNT, @CHIPCOUNT, @STOCKDATE, " +

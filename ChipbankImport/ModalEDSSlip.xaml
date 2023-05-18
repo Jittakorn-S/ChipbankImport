@@ -1,0 +1,151 @@
+﻿<Window x:Class="ChipbankImport.ModalSampleLot"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Height="930"
+        Width="900"
+        MinHeight="930"
+        MaxHeight="930"
+        MinWidth="900"
+        MaxWidth="900"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        ResizeMode="CanResize"
+        UseLayoutRounding="True"
+        WindowStartupLocation="CenterScreen">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"
+                      ResizeBorderThickness="6" />
+    </WindowChrome.WindowChrome>
+    <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
+                         UniformCornerRadius="15"
+                         materialDesign:ElevationAssist.Elevation="Dp4"
+                         MouseDown="Card_MouseDown">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Margin="150,0,150,0"
+                        Grid.ColumnSpan="3">
+                <DockPanel Margin="0 20 0 0">
+                    <TextBlock HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Margin="0 15 0 0"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               Text="EDS Slip" />
+                </DockPanel>
+                <Grid>
+                    <materialDesign:ColorZone Mode="Custom"
+                                              Background="White"
+                                              Foreground="Black"
+                                              CornerRadius="15"
+                                              Padding="55"
+                                              Margin="0,20,0,0">
+
+                        <StackPanel>
+                            <TextBox x:Name="waferLot"
+                                     materialDesign:HintAssist.Hint="Please enter the wafer lot"
+                                     MaxWidth="400"
+                                     IsEnabled="True"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     KeyDown="waferLot_KeyDown" />
+                            <TextBox x:Name="invoiceNo"
+                                     materialDesign:HintAssist.Hint="Invoice No"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            <TextBox x:Name="chipModel"
+                                     materialDesign:HintAssist.Hint="Chip Model"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            <TextBox x:Name="waferCount"
+                                     materialDesign:HintAssist.Hint="Wafer Count"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            <TextBox x:Name="chipCount"
+                                     materialDesign:HintAssist.Hint="Chip Count"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            <TextBox x:Name="plasmaStatus"
+                                     materialDesign:HintAssist.Hint="Plasma Status"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            <TextBox x:Name="lotStatus"
+                                     materialDesign:HintAssist.Hint="Lot Status"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                            <TextBox x:Name="seqNo"
+                                     materialDesign:HintAssist.Hint="SEQ"
+                                     MaxWidth="400"
+                                     IsEnabled="False"
+                                     Margin="0 20 0 0"
+                                     FontSize="20"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                        </StackPanel>
+                    </materialDesign:ColorZone>
+         
+                        <Button x:Name="UploadButton"
+                                Content="Upload"
+                                Width="200"
+                                Height="50"
+                            Margin="75,0,300,-80"
+                            VerticalAlignment="Bottom"
+                                Style="{StaticResource MaterialDesignPaperLightButton}"
+                            Click="UploadButton_Click" />
+                        <Button x:Name="checkButton"
+                                Content="Check"
+                                Width="200"
+                                Height="50"
+                            Margin="300,0,80,-80"
+                            VerticalAlignment="Bottom"
+                            Style="{StaticResource MaterialDesignPaperLightButton}"
+                                Click="checkButton_Click" />
+               
+                </Grid>
+            </StackPanel>
+     
+            <materialDesign:ColorZone Grid.Column="3"
+                                      CornerRadius="0 15 15 0"
+                                      Height="50">
+                <DockPanel>
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            materialDesign:RippleAssist.Feedback="LightPink"
+                            Foreground="OrangeRed"
+                            materialDesign:ButtonAssist.CornerRadius="6"
+                            DockPanel.Dock="Right"
+                            HorizontalAlignment="Right"
+                            x:Name="ExitModalFD"
+                            VerticalAlignment="Center"
+                            Click="ExitModalFD_Click">
+                        <materialDesign:PackIcon Kind="CloseBold" />
+                    </Button>
+                </DockPanel>
+            </materialDesign:ColorZone>
+        </Grid>
+    </materialDesign:Card>
+</Window>

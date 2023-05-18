@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Shapes;
 
 namespace ChipbankImport
 {
@@ -20,7 +8,8 @@ namespace ChipbankImport
     /// </summary>
     public partial class ModalCondition : Window
     {
-        public static bool setIsyes; // To ModalFD
+        public static bool setIsyes; // To UploadButton_Click ModalFD
+        public static bool setisyesSample; // To submitButton_Click Mainwindow
         public ModalCondition()
         {
             InitializeComponent();
@@ -28,10 +17,12 @@ namespace ChipbankImport
         private void selectNo_Click(object sender, RoutedEventArgs e)
         {
             setIsyes = false;
+            setisyesSample = false;
             Close();
         }
         private void selectYes_Click(object sender, RoutedEventArgs e)
         {
+            setisyesSample = true;
             setIsyes = true;
             Close();
         }

@@ -19,7 +19,7 @@
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
                          UniformCornerRadius="15"
                          materialDesign:ElevationAssist.Elevation="Dp4"
-                         MouseDown="FDModal_MouseDown">
+                        >
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -31,7 +31,7 @@
                 <ProgressBar IsIndeterminate="True"
                              Style="{StaticResource MaterialDesignCircularProgressBar}"
                              Value="0"
-                             Margin="30 120 0 0"
+                             Margin="0 120 0 0"
                              Height="200"
                              Width="200" />
             </StackPanel>
@@ -48,7 +48,7 @@
                             HorizontalAlignment="Right"
                             x:Name="ExitModalFD"
                             VerticalAlignment="Center"
-                            Click="exitModal_Click">
+                            >
                         <materialDesign:PackIcon Kind="CloseBold" />
                     </Button>
                 </DockPanel>

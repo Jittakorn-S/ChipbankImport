@@ -2,9 +2,10 @@
 using System.Configuration;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using static ChipbankImport.ModalFD;
 
 namespace ChipbankImport
 {
@@ -12,6 +13,8 @@ namespace ChipbankImport
     {
         private static CustomMessageBox? CustomMessageBox;
         private static ModalCondition? ModalCondition;
+        internal static string? AlarmMessage;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -59,18 +62,40 @@ namespace ChipbankImport
         private void submitButton_Click(object sender, RoutedEventArgs e)
         {
             int CountText = TextInputBarcode.Text.Length;
-            if (CountText == 16)
+            if (TextInputBarcode.Text.StartsWith('$') || CountText == 16 || CountText == 14)
             {
-                string filename = TextInputBarcode.Text + ".zip";
-                Unzip(filename);
+                if (CountText == 16)
+                {
+                    string filename = TextInputBarcode.Text + ".zip";
+                    Unzip(filename);
+                }
+                else if (TextInputBarcode.Text.StartsWith('$'))
+                {
+                    string sampleLot = TextInputBarcode.Text.Trim('$');
+                    AlarmConditionBox($"Confirm Upload Sample Lot : {sampleLot} ?");
+                    if (ModalCondition.setisyesSample == true)
+                    {
+                        UnzipSampleLot(sampleLot);
+                    }
+                } else if (CountText == 14)
+                {
+                    ModalSampleLot modalSampleLot = new ModalSampleLot();
+                    modalSampleLot.zipfileName = TextInputBarcode.Text;
+                    modalSampleLot.ShowDialog();
+                }
+                else
+                {
+                    AlarmBox("Barcode Mismatch !!!");
+                    TextInputBarcode.Focus();
+                }
+                TextInputBarcode.Clear();
+                TextInputBarcode.Focus();
             }
             else
             {
-                AlarmBox("Please enter the data correctly");
+                AlarmBox("Barcode Mismatch !!!");
                 TextInputBarcode.Focus();
             }
-            TextInputBarcode.Clear();
-            TextInputBarcode.Focus();
         }
         public static void Unzip(string FileName)
         {
@@ -135,6 +160,44 @@ namespace ChipbankImport
             else
             {
                 AlarmBox("Data not exist check Refidc02.fd !!!");
+            }
+        }
+        private void UnzipSampleLot(string getSamplelot)
+        {
+            string? extractPath = ConfigurationManager.AppSettings["ExtractPath"];
+            string? ChecklotName = ConfigurationManager.AppSettings["ChecklotName"]; /*Shared Folder*/
+            bool checkLot = false;
+            DirectoryInfo directoryInfo = new DirectoryInfo(ChecklotName!);
+            FileInfo[] files = directoryInfo.GetFiles();
+            foreach (FileInfo file in files)
+            {
+
+                string[] splitName = file.Name.Split('.');
+                string lotName = splitName[0];
+                string trimLot = getSamplelot;
+                string LotpathFolder = extractPath! + trimLot;
+                if (lotName == trimLot)
+                {
+                    if (Directory.Exists(LotpathFolder))
+                    {
+                        Directory.Delete(LotpathFolder, true);
+                        ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                        checkLot = true;
+                    }
+                    else
+                    {
+                        ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                        checkLot = true;
+                    }
+                }
+            }
+            if (checkLot == true)
+            {
+                AlarmBox("Upload Successfully !!!");
+            }
+            else
+            {
+                AlarmBox("Not found zip file in CBAll !!!");
             }
         }
         public static void AlarmBox(string AlarmMessage)

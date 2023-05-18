@@ -1,21 +1,22 @@
-﻿<Window x:Class="ChipbankImport.ModalCondition"
+﻿<Window x:Class="ChipbankImport.DataWafer"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Height="150"
-        Width="300"
+        mc:Ignorable="d"
+        MinHeight="700"
+        MinWidth="700"
+        MaxHeight="700"
+        MaxWidth="700"
         WindowStyle="None"
         AllowsTransparency="False"
         ResizeMode="CanResize"
         UseLayoutRounding="True"
-        SizeToContent="Width"
         WindowStartupLocation="CenterScreen">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
-                      ResizeBorderThickness="5" />
+                      ResizeBorderThickness="6" />
     </WindowChrome.WindowChrome>
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
                          UniformCornerRadius="15"
@@ -26,52 +27,45 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.ColumnSpan="4">
-                <DockPanel VerticalAlignment="Center"
-                           Margin="0 15 0 0">
+            <StackPanel Margin="150,0,150,0"
+                        Grid.ColumnSpan="3">
+                <DockPanel Margin="0 20 0 0">
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
-                               Margin="20 0 0 0"
+                               Margin="0 15 0 0"
                                FontSize="15"
                                FontWeight="SemiBold"
-                               Text="Alarm" />
+                               Text="EDS Data Wafer" />
                 </DockPanel>
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <DockPanel Margin="20,10,20,0">
-                        <Label x:Name="textContent"
-                               Content="Get text from function"
-                               Margin="0 0 0 10"
-                               FontSize="16" />
-                    </DockPanel>
-                </Grid>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <StackPanel>
-                        <Button x:Name="selectYes"
-                                Width="100"
-                                Content="Yes"
-                                Style="{StaticResource MaterialDesignPaperLightButton}"
-                                Margin="-80 0 30 0"
-                                Click="selectYes_Click" />
-                        <Button x:Name="selectNo"
-                                Width="100"
-                                Content="No"
-                                Margin="70 -33 -40 0"
-                                Style="{StaticResource MaterialDesignPaperLightButton}"
-                                Click="selectNo_Click" />
-                    </StackPanel>
+                    <materialDesign:ColorZone Mode="Custom"
+                                              Background="White"
+                                              Foreground="Black"
+                                              CornerRadius="15"
+                                              Padding="20"
+                                              Width="250"
+                                              Margin="0,20,0,0">
+                        <DataGrid x:Name="dataGridwafer"
+                                  CanUserAddRows="False"
+                                  SelectionMode="Extended"
+                                  SelectionUnit="Cell"
+                                  AutoGenerateColumns="True" />
+
+                    </materialDesign:ColorZone>
+                    <Button x:Name="closeButton"
+                            Content="Close"
+                            Width="200"
+                            Height="50"
+                            Margin="80,0,80,-80"
+                            VerticalAlignment="Bottom"
+                            Style="{StaticResource MaterialDesignPaperLightButton}"
+                            Click="closeButton_Click" />
+
                 </Grid>
             </StackPanel>
+
             <materialDesign:ColorZone Grid.Column="3"
                                       CornerRadius="0 15 15 0"
                                       Height="50">
@@ -82,9 +76,9 @@
                             materialDesign:ButtonAssist.CornerRadius="6"
                             DockPanel.Dock="Right"
                             HorizontalAlignment="Right"
-                            x:Name="ExitAlarm"
+                            x:Name="ExitModalFD"
                             VerticalAlignment="Center"
-                            Click="ExitAlarm_Click">
+                            Click="ExitModalFD_Click">
                         <materialDesign:PackIcon Kind="CloseBold" />
                     </Button>
                 </DockPanel>
@@ -92,5 +86,3 @@
         </Grid>
     </materialDesign:Card>
 </Window>
-
-    
