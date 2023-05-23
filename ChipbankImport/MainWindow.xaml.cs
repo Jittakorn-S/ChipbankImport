@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using static System.Net.WebRequestMethods;
 
 namespace ChipbankImport
 {
@@ -24,6 +20,11 @@ namespace ChipbankImport
         {
             InitializeComponent();
             TextInputBarcode.Focus();
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            restoreScreenButton.Visibility = Visibility.Collapsed;
+            WindowState = WindowState.Normal;
         }
         private void exitButton_Click(object sender, RoutedEventArgs e)
         {
@@ -42,19 +43,21 @@ namespace ChipbankImport
         }
         private void minimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            Window window = Application.Current.MainWindow;
-            window.WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
+        }
+        private void restoreScreenButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Normal;
+            WindowStyle = WindowStyle.None;
+            ResizeMode = ResizeMode.CanResize;
         }
         private void fullScreenButton_Click(object sender, RoutedEventArgs e)
         {
-            Window window = Application.Current.MainWindow;
-            if (window.WindowState == WindowState.Maximized)
+            if (WindowState == WindowState.Normal)
             {
-                window.WindowState = WindowState.Normal;
-            }
-            else
-            {
-                window.WindowState = WindowState.Maximized;
+                WindowState = WindowState.Maximized;
+                WindowStyle = WindowStyle.None;
+                ResizeMode = ResizeMode.NoResize;
             }
         }
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
@@ -62,6 +65,38 @@ namespace ChipbankImport
             if (e.Key == Key.Enter)
             {
                 submitButton_Click(sender, e);
+            }
+        }
+        private void Window_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2 || WindowState == WindowState.Normal)
+            {
+                WindowState = WindowState.Maximized;
+                WindowStyle = WindowStyle.None;
+                ResizeMode = ResizeMode.NoResize;
+            }
+            else
+            {
+                WindowState = WindowState.Normal;
+                WindowStyle = WindowStyle.None;
+                ResizeMode = ResizeMode.CanResize;
+            }
+        }
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            switch (WindowState)
+            {
+                case WindowState.Maximized:
+                    fullScreenButton.Visibility = Visibility.Collapsed;
+                    restoreScreenButton.Visibility = Visibility.Visible;
+                    break;
+                case WindowState.Normal:
+                    fullScreenButton.Visibility = Visibility.Visible;
+                    restoreScreenButton.Visibility = Visibility.Collapsed;
+                    break;
+                default:
+                    restoreScreenButton.Visibility = Visibility.Collapsed;
+                    break;
             }
         }
         private void submitButton_Click(object sender, RoutedEventArgs e)
@@ -235,7 +270,7 @@ namespace ChipbankImport
                         }
                         else
                         {
-                           await Task.Delay(1000);
+                            await Task.Delay(1000);
                         }
                     });
                 }

@@ -11,7 +11,10 @@
         AllowsTransparency="False"
         ResizeMode="CanResize"
         UseLayoutRounding="True"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        StateChanged="Window_StateChanged"
+        PreviewMouseDoubleClick="Window_PreviewMouseDoubleClick"
+        Loaded="Window_Loaded">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="5" />
@@ -46,7 +49,7 @@
                             </Image.Clip>
                         </Image>
                         <TextBlock Text="Chipbank Import"
-                                   FontSize="20"
+                                   FontSize="21"
                                    FontWeight="Bold"
                                    HorizontalAlignment="left"
                                    VerticalAlignment="Center"
@@ -77,9 +80,9 @@
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="0 10 0 0"
-                               FontSize="20"
+                               FontSize="22"
                                FontWeight="SemiBold"
-                               Text="Home" />
+                               Text="FD Sheet And EDS Slip" />
                 </DockPanel>
                 <Grid>
                     <materialDesign:ColorZone Grid.Column="0"
@@ -136,7 +139,6 @@
                             VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="CloseBold" />
                     </Button>
-
                     <Button Style="{StaticResource MaterialDesignIconButton}"
                             materialDesign:RippleAssist.Feedback="LightPink"
                             Foreground="OrangeRed"
@@ -146,6 +148,16 @@
                             x:Name="fullScreenButton"
                             Click="fullScreenButton_Click">
                         <materialDesign:PackIcon Kind="Fullscreen" />
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            materialDesign:RippleAssist.Feedback="LightPink"
+                            Foreground="OrangeRed"
+                            materialDesign:ButtonAssist.CornerRadius="6"
+                            DockPanel.Dock="Right"
+                            HorizontalAlignment="Right"
+                            x:Name="restoreScreenButton"
+                            Click="restoreScreenButton_Click">
+                        <materialDesign:PackIcon Kind="WindowRestore" />
                     </Button>
                     <Button Style="{StaticResource MaterialDesignIconButton}"
                             materialDesign:RippleAssist.Feedback="LightPink"
