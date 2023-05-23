@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using static System.Net.WebRequestMethods;
 
 namespace ChipbankImport
 {
@@ -11,8 +16,10 @@ namespace ChipbankImport
     {
         private static CustomMessageBox? CustomMessageBox;
         private static ModalCondition? ModalCondition;
-        internal static string? AlarmMessage;
-
+        public static readonly string? AlarmMessage;
+        ProgressBar progress = new ProgressBar();
+        int totalFiles = 0;
+        int processedFiles = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -69,12 +76,17 @@ namespace ChipbankImport
                 }
                 else if (TextInputBarcode.Text.StartsWith('$'))
                 {
-                    string sampleLot = TextInputBarcode.Text.Trim('$');
-                    AlarmConditionBox($"Confirm Upload Sample Lot : {sampleLot} ?");
-                    if (ModalCondition.setisyesSample == true)
+                    Application.Current.Dispatcher.Invoke((Action)async delegate
                     {
-                        UnzipSampleLot(sampleLot);
-                    }
+                        string sampleLot = TextInputBarcode.Text.Trim('$');
+                        AlarmConditionBox($"Confirm Upload Sample Lot : {sampleLot} ?");
+                        if (ModalCondition.setisyesSample)
+                        {
+                            progress.Show();
+                            await UnzipSampleLot(sampleLot);
+                            progress.Close();
+                        }
+                    });
                 }
                 else if (CountText == 14)
                 {
@@ -109,15 +121,15 @@ namespace ChipbankImport
 
             Directory.CreateDirectory(ProcessPath);
 
-            if (File.Exists(NewCopyCB))
+            if (System.IO.File.Exists(NewCopyCB))
             {
-                File.Delete(NewCopyCB);
+                System.IO.File.Delete(NewCopyCB);
             }
-            if (File.Exists(FileToCopy))
+            if (System.IO.File.Exists(FileToCopy))
             {
                 try
                 {
-                    File.Copy(FileToCopy, NewCopyCB);
+                    System.IO.File.Copy(FileToCopy, NewCopyCB);
                 }
                 catch (Exception)
                 {
@@ -134,7 +146,7 @@ namespace ChipbankImport
                 AlarmBox("Please check location file");
             }
 
-            if (File.Exists(ProcessPath + @"\FD\Refidc02.fd"))
+            if (System.IO.File.Exists(ProcessPath + @"\FD\Refidc02.fd"))
             {
                 string? ReadlineText = null;
                 string? InvoiceNo = null;
@@ -161,36 +173,74 @@ namespace ChipbankImport
                 AlarmBox("Data not exist check Refidc02.fd !!!");
             }
         }
-        private void UnzipSampleLot(string getSamplelot)
+        private async Task UnzipSampleLot(string getSamplelot)
         {
             string? extractPath = ConfigurationManager.AppSettings["ExtractPath"];
             string? ChecklotName = ConfigurationManager.AppSettings["ChecklotName"]; /*Shared Folder*/
             bool checkLot = false;
             DirectoryInfo directoryInfo = new DirectoryInfo(ChecklotName!);
             FileInfo[] files = directoryInfo.GetFiles();
-            foreach (FileInfo file in files)
+            totalFiles = files.Length;
+            processedFiles = 0;
+            await Task.Run(() =>
             {
-
-                string[] splitName = file.Name.Split('.');
-                string lotName = splitName[0];
-                string trimLot = getSamplelot;
-                string LotpathFolder = extractPath! + trimLot;
-                if (lotName == trimLot)
+                foreach (FileInfo file in files)
                 {
-                    if (Directory.Exists(LotpathFolder))
+                    string[] splitName = file.Name.Split('.');
+                    string lotName = splitName[0];
+                    string trimLot = getSamplelot;
+                    string LotpathFolder = extractPath! + trimLot;
+                    if (lotName == trimLot)
                     {
-                        Directory.Delete(LotpathFolder, true);
-                        ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
-                        checkLot = true;
+                        if (Directory.Exists(LotpathFolder))
+                        {
+                            if (!file.FullName.EndsWith(".bak"))
+                            {
+                                if (!file.Exists)
+                                {
+                                    ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                                    System.IO.File.Move(file.FullName, file.FullName + ".bak");
+                                    checkLot = true;
+                                }
+                                else
+                                {
+                                    Application.Current.Dispatcher.Invoke((Action)delegate
+                                    {
+                                        AlarmBox("This lot has data, please check !!!");
+                                    });
+                                }
+                            }
+                            else
+                            {
+                                Application.Current.Dispatcher.Invoke((Action)delegate
+                                {
+                                    AlarmBox("Unzip already, please check !!!");
+                                });
+                            }
+                        }
+                        else
+                        {
+                            ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                            System.IO.File.Move(file.FullName, file.FullName + ".bak");
+                            checkLot = true;
+                        }
                     }
-                    else
+                    processedFiles++;
+                    Application.Current.Dispatcher.Invoke(async () =>
                     {
-                        ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
-                        checkLot = true;
-                    }
+                        double progressPercentage = (double)processedFiles / totalFiles * 100;
+                        if (progressPercentage != 0 || progressPercentage != double.PositiveInfinity || progressPercentage != double.NegativeInfinity)
+                        {
+                            await Task.Delay((int)progressPercentage);
+                        }
+                        else
+                        {
+                           await Task.Delay(1000);
+                        }
+                    });
                 }
-            }
-            if (checkLot == true)
+            });
+            if (checkLot)
             {
                 AlarmBox("Upload Successfully !!!");
             }

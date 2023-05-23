@@ -6,9 +6,9 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         MinHeight="850"
-        MinWidth="700"
+        MinWidth="800"
         MaxHeight="850"
-        MaxWidth="700"
+        MaxWidth="800"
         WindowStyle="None"
         AllowsTransparency="False"
         ResizeMode="CanResize"
@@ -35,7 +35,7 @@
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="0 15 0 0"
-                               FontSize="15"
+                               FontSize="20"
                                FontWeight="SemiBold"
                                Text="EDS Data Wafer" />
                 </DockPanel>
@@ -45,20 +45,23 @@
                                               Foreground="Black"
                                               CornerRadius="15"
                                               Padding="20"
-                                              Width="300"
+                                              Width="350"
                                               Margin="0,20,0,0">
                         <DataGrid x:Name="dataGridwafer"
                                   CanUserAddRows="False"
                                   SelectionMode="Extended"
                                   SelectionUnit="Cell"
-                                  FontSize="20"
+                                  FontSize="18"
+                                  MaxHeight="600"
+                                  Width="auto"
                                   CanUserDeleteRows="False"
                                   CanUserReorderColumns="False"
                                   CanUserResizeRows="False"
-                                  CanUserSortColumns="False" 
+                                  CanUserSortColumns="False"
                                   IsReadOnly="True"
-                                  AutoGenerateColumns="True" />
-
+                                  AutoGenerateColumns="True"
+                                  TextBlock.TextAlignment="Right"
+                                  VerticalScrollBarVisibility="Auto" />
                     </materialDesign:ColorZone>
                     <Button x:Name="closeButton"
                             Content="Close"

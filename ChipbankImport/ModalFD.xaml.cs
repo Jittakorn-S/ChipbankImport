@@ -4,6 +4,8 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -11,42 +13,42 @@ namespace ChipbankImport
 {
     public partial class ModalFD : Window
     {
-        public string? _InvoiceNo { get; set; } // from Mainwindow
         public int _LotCount { get; set; } // from Mainwindow
+        public string? _InvoiceNo { get; set; } // from Mainwindow
         public string? GetProcessPath { get; set; } // from Mainwindow
         private static string? TmpData;
+        private static StringBuilder stringBuilder = new StringBuilder();
         private static string? useqno;
         private static string? finseqno;
+        private static string? resultTmpData;
         public struct WaferData
         {
-            public string ActualNo;
-            public string WFLotNo;
-            public string RFSeqNo;
-            public string ChipModelName;
-            public string ModelCode1;
-            public string ModelCode2;
-            public string RohmModelName;
-            public string InvoiceNo;
-            public string CaseNo;
-            public string Box;
-            public string OutDiv;
-            public string RecDiv;
-            public string OrderNo;
-            public string ControlCode;
-            public string PayClass;
-            public string WFCount;
-            public string ChipCount;
+            public string ActualNo { get; set; }
+            public string WFLotNo { get; set; }
+            public string RFSeqNo { get; set; }
+            public string ChipModelName { get; set; }
+            public string ModelCode1 { get; set; }
+            public string ModelCode2 { get; set; }
+            public string RohmModelName { get; set; }
+            public string InvoiceNo { get; set; }
+            public string CaseNo { get; set; }
+            public string Box { get; set; }
+            public string OutDiv { get; set; }
+            public string RecDiv { get; set; }
+            public string OrderNo { get; set; }
+            public string ControlCode { get; set; }
+            public string PayClass { get; set; }
+            public string WFCount { get; set; }
+            public string ChipCount { get; set; }
         }
         public ModalFD()
         {
             InitializeComponent();
         }
-
         private void exitModal_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
-
         private void FDModal_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -75,18 +77,13 @@ namespace ChipbankImport
                 MainWindow.AlarmBox("Data not exist check Refidc02.fd !!!");
             }
         }
-        private void UploadDataFDSheet(bool checkError)
+        private void UploadDataFDSheet()
         {
             string? ReadlineTextFD = null;
             if (File.Exists(GetProcessPath))
             {
-                using (FileStream fileStream = new FileStream(GetProcessPath, FileMode.Open))
+                using (FileStream fileStream = new(GetProcessPath, FileMode.Open))
                 {
-                    if (checkError == true)
-                    {
-                        fileStream.Close();
-                        fileStream.Dispose();
-                    }
                     using (StreamReader streamReader = new StreamReader(fileStream))
                     {
                         while ((ReadlineTextFD = streamReader.ReadLine()) != null)
@@ -127,6 +124,8 @@ namespace ChipbankImport
         {
             int POS = 152;
             int POS2 = 155;
+            TmpData = null;
+            resultTmpData = null;
             for (int i = 0; i <= 39; i++)
             {
                 if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length != 0)
@@ -137,41 +136,41 @@ namespace ChipbankImport
                     //SET_WF_SEQ
                     if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 1)
                     {
-                        TmpData = TmpData + "  " + WFSEQ;
+                        resultTmpData = stringBuilder.Append(TmpData).Append("  ").Append(WFSEQ).ToString();
                     }
                     else if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 2)
                     {
-                        TmpData = TmpData + " " + WFSEQ;
+                        resultTmpData = stringBuilder.Append(TmpData).Append(" ").Append(WFSEQ).ToString();
                     }
                     else if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 3)
                     {
-                        TmpData = TmpData + WFSEQ;
+                        resultTmpData = stringBuilder.Append(TmpData).Append(WFSEQ).ToString();
                     }
                     //-------------------------------------------------------------
                     //SET_CHIP_COUNT
                     if (waferchipcount.Trim().Length == 1)
                     {
-                        TmpData = TmpData + "     " + waferchipcount.Trim();
+                        resultTmpData = stringBuilder.Append(TmpData).Append("     ").Append(waferchipcount.Trim()).ToString();
                     }
                     else if (waferchipcount.Trim().Length == 2)
                     {
-                        TmpData = TmpData + "    " + waferchipcount.Trim();
+                        resultTmpData = stringBuilder.Append(TmpData).Append("    ").Append(waferchipcount.Trim()).ToString();
                     }
                     else if (waferchipcount.Trim().Length == 3)
                     {
-                        TmpData = TmpData + "   " + waferchipcount.Trim();
+                        resultTmpData = stringBuilder.Append(TmpData).Append("   ").Append(waferchipcount.Trim()).ToString();
                     }
                     else if (waferchipcount.Trim().Length == 4)
                     {
-                        TmpData = TmpData + "  " + waferchipcount.Trim();
+                        resultTmpData = stringBuilder.Append(TmpData).Append("  ").Append(waferchipcount.Trim()).ToString();
                     }
                     else if (waferchipcount.Trim().Length == 5)
                     {
-                        TmpData = TmpData + " " + waferchipcount.Trim();
+                        resultTmpData = stringBuilder.Append(TmpData).Append(" ").Append(waferchipcount.Trim()).ToString();
                     }
                     else if (waferchipcount.Trim().Length == 6)
                     {
-                        TmpData = TmpData + waferchipcount.Trim();
+                        resultTmpData = stringBuilder.Append(TmpData).Append(waferchipcount.Trim()).ToString();
                     }
                     //-------------------------------------------------------------
                 }
@@ -212,7 +211,7 @@ namespace ChipbankImport
                                                                                      "WHERE SYSKEY = '01';", connection))
                                         {
                                             sqlCommandUpdate.Parameters.AddWithValue("@ALOCATEDATE", ALOCATEDATE);
-                                            //sqlCommandUpdate.ExecuteNonQuery();
+                                            sqlCommandUpdate.ExecuteNonQuery();
                                             useqno = "0001";
                                         }
                                     }
@@ -242,7 +241,7 @@ namespace ChipbankImport
                                                      "WHERE SYSKEY = '01';", connection))
                                         {
                                             sqlCommandUpdate.Parameters.AddWithValue("@SEQNO", SEQNO);
-                                            // sqlCommandUpdate.ExecuteNonQuery();
+                                            sqlCommandUpdate.ExecuteNonQuery();
                                         }
                                     }
                                 }
@@ -257,7 +256,7 @@ namespace ChipbankImport
                                     sqlCommandQuery.Parameters.AddWithValue("@SYSKEY", "01");
                                     sqlCommandQuery.Parameters.AddWithValue("@ALOCATEDATE", ALOCATEDATE);
                                     sqlCommandQuery.Parameters.AddWithValue("@SEQNO", 2);
-                                    //   sqlCommandQuery.ExecuteNonQuery();
+                                    sqlCommandQuery.ExecuteNonQuery();
                                     useqno = "0001";
                                 }
                                 catch (SqlException)
@@ -283,8 +282,8 @@ namespace ChipbankImport
         {
             string TIMESTAMP = DateTime.Now.ToString();
             string STOCKDATE = DateTime.Now.ToString("yyMMdd");
-            string WFDATA1 = TmpData!.Substring(0, 180);
-            string WFDATA2 = TmpData!.Substring(180, 180);
+            string WFDATA1 = resultTmpData!.Substring(0, 180);
+            string WFDATA2 = resultTmpData!.Substring(180, 180);
             string ReWFDATA1 = WFDATA1.Replace("  0", "   ");
             string ReWFDATA2 = WFDATA2.Replace("  0", "   ");
             string ConnetionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
@@ -322,7 +321,7 @@ namespace ChipbankImport
                     sqlCommandQuery.Parameters.AddWithValue("@WFINPUT", "1");
                     sqlCommandQuery.Parameters.AddWithValue("@TIMESTAMP", TIMESTAMP);
                     sqlCommandQuery.Parameters.AddWithValue("@RF_SEQNO", GetwaferData.RFSeqNo);
-                    // sqlCommandQuery.ExecuteNonQuery();
+                    sqlCommandQuery.ExecuteNonQuery();
                 }
                 catch (SqlException)
                 {
@@ -334,7 +333,7 @@ namespace ChipbankImport
                     sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
                     sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
                     sqlCommandQuery.Parameters.AddWithValue("@finseqno", finseqno);
-                    //  sqlCommandQuery.ExecuteNonQuery();
+                    sqlCommandQuery.ExecuteNonQuery();
                 }
                 catch (SqlException)
                 {
@@ -376,7 +375,7 @@ namespace ChipbankImport
                     sqlCommandQuery.Parameters.AddWithValue("@PROCESSCODE", GetwaferData.RecDiv);
                     sqlCommandQuery.Parameters.AddWithValue("@DELETEFLAG", "");
                     sqlCommandQuery.Parameters.AddWithValue("@TIMESTAMP", TIMESTAMP);
-                    // sqlCommandQuery.ExecuteNonQuery();
+                    sqlCommandQuery.ExecuteNonQuery();
                 }
             }
             catch (SqlException)
@@ -390,7 +389,6 @@ namespace ChipbankImport
             string? ChecklotName = ConfigurationManager.AppSettings["ChecklotName"]; /*Shared Folder*/
             DirectoryInfo directoryInfo = new DirectoryInfo(ChecklotName!);
             FileInfo[] files = directoryInfo.GetFiles();
-
             foreach (FileInfo file in files)
             {
                 try
@@ -403,19 +401,26 @@ namespace ChipbankImport
                     {
                         if (Directory.Exists(LotpathFolder))
                         {
-                            Directory.Delete(LotpathFolder, true);
-                            ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                            if (!file.FullName.EndsWith(".bak"))
+                            {
+                                Directory.Delete(LotpathFolder, true);
+                                ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                                File.Move(file.FullName, file.FullName + ".bak");
+                            }
                         }
                         else
                         {
-                            ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                            if (!file.FullName.EndsWith(".bak"))
+                            {
+                                ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
+                                File.Move(file.FullName, file.FullName + ".bak");
+                            }
                         }
                     }
                 }
                 catch
                 {
                     MainWindow.AlarmBox("Not found zip file in CBAll !!!");
-                    UploadDataFDSheet(true);
                 }
             }
         }
@@ -426,24 +431,40 @@ namespace ChipbankImport
                 if (_InvoiceNo == "        ")
                 {
                     MainWindow.AlarmConditionBox("Confirm Upload ?");
-                    if (ModalCondition.setIsyes == true)
+                    if (ModalCondition.setIsyes)
                     {
                         SETSEQ();
-                        UploadDataFDSheet(false);
+                        UploadDataFDSheet();
                         MainWindow.AlarmBox("Upload Successfully");
-                        Close();
-                    }
-                    else
-                    {
                         Close();
                     }
                 }
                 else
                 {
-                    SETSEQ();
-                    UploadDataFDSheet(false);
-                    MainWindow.AlarmBox("Upload Successfully");
-                    Close();
+                    string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+                    using (SqlConnection connection = new SqlConnection(ConnectionString))
+                    {
+                        connection.Open();
+                        using (SqlCommand sqlCommand = new SqlCommand("SELECT INVOICENO FROM CHIPZAIKO where INVOICENO = @_InvoiceNo order by TIMESTAMP desc", connection))
+                        {
+                            sqlCommand.Parameters.AddWithValue("@_InvoiceNo", _InvoiceNo);
+                            using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    MainWindow.AlarmBox("This invoice has been uploaded, Please check !!!");
+                                    Close();
+                                }
+                                else
+                                {
+                                    SETSEQ();
+                                    UploadDataFDSheet();
+                                    MainWindow.AlarmBox("Upload Successfully");
+                                    Close();
+                                }
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)

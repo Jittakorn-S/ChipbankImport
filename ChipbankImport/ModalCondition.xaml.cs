@@ -3,13 +3,10 @@ using System.Windows.Input;
 
 namespace ChipbankImport
 {
-    /// <summary>
-    /// Interaction logic for ModalCondition.xaml
-    /// </summary>
     public partial class ModalCondition : Window
     {
-        public static bool setIsyes; // To UploadButton_Click ModalFD
-        public static bool setisyesSample; // To submitButton_Click Mainwindow
+        public static bool setIsyes { get; set; } // To UploadButton_Click ModalFD
+        public static bool setisyesSample { get; set; } // To submitButton_Click Mainwindow
         public ModalCondition()
         {
             InitializeComponent();

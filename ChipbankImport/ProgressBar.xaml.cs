@@ -1,15 +1,18 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 
 namespace ChipbankImport
 {
-    /// <summary>
-    /// Interaction logic for ProgressBar.xaml
-    /// </summary>
     public partial class ProgressBar : Window
     {
         public ProgressBar()
         {
             InitializeComponent();
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Visibility = Visibility.Hidden;
         }
     }
 }

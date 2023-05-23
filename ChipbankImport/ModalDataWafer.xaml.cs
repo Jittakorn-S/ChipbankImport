@@ -3,9 +3,6 @@ using System.Windows.Input;
 
 namespace ChipbankImport
 {
-    /// <summary>
-    /// Interaction logic for DataWafer.xaml
-    /// </summary>
     public partial class DataWafer : Window
     {
         public DataWafer()

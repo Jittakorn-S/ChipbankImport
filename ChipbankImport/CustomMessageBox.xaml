@@ -12,6 +12,7 @@
         ResizeMode="CanResize"
         UseLayoutRounding="True"
         SizeToContent="Width"
+        Closing="Window_Closing"
         WindowStartupLocation="CenterScreen">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"

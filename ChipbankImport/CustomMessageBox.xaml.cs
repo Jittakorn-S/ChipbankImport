@@ -1,11 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ChipbankImport
 {
-    /// <summary>
-    /// Interaction logic for CustomMessageBox.xaml
-    /// </summary>
     public partial class CustomMessageBox : Window
     {
         public CustomMessageBox()
@@ -28,6 +26,11 @@ namespace ChipbankImport
             {
                 DragMove();
             }
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Visibility = Visibility.Hidden;
         }
     }
 }
