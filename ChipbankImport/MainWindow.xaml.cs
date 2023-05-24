@@ -213,10 +213,13 @@ namespace ChipbankImport
             string? extractPath = ConfigurationManager.AppSettings["ExtractPath"];
             string? ChecklotName = ConfigurationManager.AppSettings["ChecklotName"]; /*Shared Folder*/
             bool checkLot = false;
+
             DirectoryInfo directoryInfo = new DirectoryInfo(ChecklotName!);
             FileInfo[] files = directoryInfo.GetFiles();
+
             totalFiles = files.Length;
             processedFiles = 0;
+
             await Task.Run(() =>
             {
                 foreach (FileInfo file in files)
@@ -224,47 +227,35 @@ namespace ChipbankImport
                     string[] splitName = file.Name.Split('.');
                     string lotName = splitName[0];
                     string trimLot = getSamplelot;
-                    string LotpathFolder = extractPath! + trimLot;
+                    string lotPathFolder = Path.Combine(extractPath!, trimLot);
+
                     if (lotName == trimLot)
                     {
-                        if (Directory.Exists(LotpathFolder))
+                        if (!file.FullName.EndsWith(".bak"))
                         {
-                            if (!file.FullName.EndsWith(".bak"))
+                            if (!file.Exists)
                             {
-                                if (!file.Exists)
-                                {
-                                    ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
-                                    System.IO.File.Move(file.FullName, file.FullName + ".bak");
-                                    checkLot = true;
-                                }
-                                else
-                                {
-                                    Application.Current.Dispatcher.Invoke((Action)delegate
-                                    {
-                                        AlarmBox("This lot has data, please check !!!");
-                                    });
-                                }
+                                ZipFile.ExtractToDirectory(file.FullName, lotPathFolder);
+                                File.Move(file.FullName, file.FullName + ".bak");
+                                checkLot = true;
                             }
                             else
                             {
-                                Application.Current.Dispatcher.Invoke((Action)delegate
-                                {
-                                    AlarmBox("Unzip already, please check !!!");
-                                });
+                                Application.Current.Dispatcher.Invoke(() => AlarmBox("This lot has data, please check !!!"));
                             }
                         }
                         else
                         {
-                            ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
-                            System.IO.File.Move(file.FullName, file.FullName + ".bak");
-                            checkLot = true;
+                            Application.Current.Dispatcher.Invoke(() => AlarmBox("Unzip already, please check !!!"));
                         }
                     }
+
                     processedFiles++;
+
                     Application.Current.Dispatcher.Invoke(async () =>
                     {
                         double progressPercentage = (double)processedFiles / totalFiles * 100;
-                        if (progressPercentage != 0 || progressPercentage != double.PositiveInfinity || progressPercentage != double.NegativeInfinity)
+                        if (progressPercentage != 0 && !double.IsInfinity(progressPercentage))
                         {
                             await Task.Delay((int)progressPercentage);
                         }

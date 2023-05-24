@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
@@ -15,8 +14,7 @@ namespace ChipbankImport
         public int _LotCount { get; set; } // from Mainwindow
         public string? _InvoiceNo { get; set; } // from Mainwindow
         public string? GetProcessPath { get; set; } // from Mainwindow
-        private static string? TmpData;
-        private static StringBuilder stringBuilder = new StringBuilder();
+        private static string? TmpData = null;
         private static string? useqno;
         private static string? finseqno;
         private static string? resultTmpData;
@@ -106,10 +104,10 @@ namespace ChipbankImport
                                 WFCount = ReadlineTextFD.Substring(143, 2),
                                 ChipCount = ReadlineTextFD.Substring(145, 7),
                             };
-                            SET_WAFER(ReadlineTextFD);
+                            SetWafer(ReadlineTextFD);
                             STOCKDATA(waferData);
                             STOCKINDATA(waferData);
-                            UnZipLOT(waferData);
+                            UnZipLot(waferData);
                         }
                     }
                 }
@@ -119,59 +117,42 @@ namespace ChipbankImport
                 MainWindow.AlarmBox("Data not exist check Refidc02.fd !!!");
             }
         }
-        public static void SET_WAFER(string GetReadlineTextFD)
+        public static void SetWafer(string getReadlineTextFD)
         {
-            int POS = 152;
-            int POS2 = 155;
-            TmpData = null;
-            resultTmpData = null;
+            int pos = 152;
+            int pos2 = 155;
+            StringBuilder stringBuilder = new StringBuilder();
+
             for (int i = 0; i <= 39; i++)
             {
-                if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length != 0)
+                if (getReadlineTextFD.Substring(pos + (9 * i), 3).Length != 0)
                 {
-                    string WFSEQ = GetReadlineTextFD.Substring(POS + (9 * i), 3);
+                    string wfSeq = getReadlineTextFD.Substring(pos + (9 * i), 3);
+                    string waferChipCount = getReadlineTextFD.Substring(pos2 + (9 * i), 6);
 
-                    string waferchipcount = GetReadlineTextFD.Substring(POS2 + (9 * i), 6);
-                    //SET_WF_SEQ
-                    if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 1)
+                    // SET_WF_SEQ
+                    int wfSeqLength = getReadlineTextFD.Substring(pos + (9 * i), 3).Length;
+                    stringBuilder.Append(TmpData);
+                    stringBuilder.Append(wfSeqLength switch
                     {
-                        resultTmpData = stringBuilder.Append(TmpData).Append("  ").Append(WFSEQ).ToString();
-                    }
-                    else if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 2)
+                        1 => "  ",
+                        2 => " ",
+                        _ => ""
+                    });
+                    stringBuilder.Append(wfSeq);
+
+                    // SET_CHIP_COUNT
+                    int waferChipCountLength = waferChipCount.Trim().Length;
+                    stringBuilder.Append(waferChipCountLength switch
                     {
-                        resultTmpData = stringBuilder.Append(TmpData).Append(" ").Append(WFSEQ).ToString();
-                    }
-                    else if (GetReadlineTextFD.Substring(POS + (9 * i), 3).Length == 3)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append(WFSEQ).ToString();
-                    }
-                    //-------------------------------------------------------------
-                    //SET_CHIP_COUNT
-                    if (waferchipcount.Trim().Length == 1)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append("     ").Append(waferchipcount.Trim()).ToString();
-                    }
-                    else if (waferchipcount.Trim().Length == 2)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append("    ").Append(waferchipcount.Trim()).ToString();
-                    }
-                    else if (waferchipcount.Trim().Length == 3)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append("   ").Append(waferchipcount.Trim()).ToString();
-                    }
-                    else if (waferchipcount.Trim().Length == 4)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append("  ").Append(waferchipcount.Trim()).ToString();
-                    }
-                    else if (waferchipcount.Trim().Length == 5)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append(" ").Append(waferchipcount.Trim()).ToString();
-                    }
-                    else if (waferchipcount.Trim().Length == 6)
-                    {
-                        resultTmpData = stringBuilder.Append(TmpData).Append(waferchipcount.Trim()).ToString();
-                    }
-                    //-------------------------------------------------------------
+                        1 => "     ",
+                        2 => "    ",
+                        3 => "   ",
+                        4 => "  ",
+                        5 => " ",
+                        _ => ""
+                    });
+                    stringBuilder.Append(waferChipCount.Trim());
                 }
                 else
                 {
@@ -179,16 +160,16 @@ namespace ChipbankImport
                     break;
                 }
             }
+
+            resultTmpData = stringBuilder.ToString();
         }
-        public static void SETSEQ()
+        public static void SetSeq()
         {
             try
             {
-                string? ALOCATEDATE = null;
-                int countSeq = 0;
-                int SEQNO = 0;
-                string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                string? allocatedDate = null;
+                string connectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
                     using (SqlCommand sqlCommand = new SqlCommand("SELECT * FROM CHIPSYS WHERE SYSKEY = @SYSKEY", connection))
@@ -198,48 +179,41 @@ namespace ChipbankImport
                         {
                             if (reader.HasRows)
                             {
-                                foreach (DbDataRecord record in reader)
+                                while (reader.Read())
                                 {
-                                    SEQNO = Convert.ToInt16(record.GetDecimal(2));
-                                    ALOCATEDATE = record.GetString(1);
-                                    if (ALOCATEDATE != DateTime.Now.ToString("yyMMdd"))
+                                    int seqNo = (int)reader.GetDecimal(2);
+                                    allocatedDate = reader.GetString(1);
+
+                                    if (allocatedDate != DateTime.Now.ToString("yyMMdd"))
                                     {
-                                        ALOCATEDATE = DateTime.Now.ToString("yyMMdd");
-                                        using (var sqlCommandUpdate = new SqlCommand("UPDATE CHIPSYS " +
-                                                                                     "SET ALOCATEDATE = @ALOCATEDATE, SEQNO = 2 " +
-                                                                                     "WHERE SYSKEY = '01';", connection))
+                                        allocatedDate = DateTime.Now.ToString("yyMMdd");
+                                        using (SqlCommand sqlCommandUpdate = new SqlCommand("UPDATE CHIPSYS " +
+                                                                                             "SET ALOCATEDATE = @ALOCATEDATE, SEQNO = 2 " +
+                                                                                             "WHERE SYSKEY = '01'", connection))
                                         {
-                                            sqlCommandUpdate.Parameters.AddWithValue("@ALOCATEDATE", ALOCATEDATE);
+                                            sqlCommandUpdate.Parameters.AddWithValue("@ALOCATEDATE", allocatedDate);
                                             sqlCommandUpdate.ExecuteNonQuery();
                                             useqno = "0001";
                                         }
                                     }
                                     else
                                     {
-                                        countSeq = SEQNO.ToString().Length;
-                                        if (countSeq == 4)
+                                        int countSeq = seqNo.ToString().Length;
+                                        useqno = countSeq switch
                                         {
-                                            useqno = SEQNO.ToString();
-                                        }
-                                        else if (countSeq == 3)
-                                        {
-                                            useqno = "0" + SEQNO.ToString();
-                                        }
-                                        else if (countSeq == 2)
-                                        {
-                                            useqno = "00" + SEQNO.ToString();
-                                        }
-                                        else if (countSeq == 1)
-                                        {
-                                            useqno = "000" + SEQNO.ToString();
-                                        }
-                                        SEQNO = SEQNO + 1;
+                                            4 => seqNo.ToString(),
+                                            3 => "0" + seqNo.ToString(),
+                                            2 => "00" + seqNo.ToString(),
+                                            1 => "000" + seqNo.ToString(),
+                                            _ => useqno
+                                        };
+                                        seqNo++;
 
                                         using (SqlCommand sqlCommandUpdate = new SqlCommand("UPDATE CHIPSYS " +
-                                                     "SET SEQNO = @SEQNO " +
-                                                     "WHERE SYSKEY = '01';", connection))
+                                                                     "SET SEQNO = @SEQNO " +
+                                                                     "WHERE SYSKEY = '01'", connection))
                                         {
-                                            sqlCommandUpdate.Parameters.AddWithValue("@SEQNO", SEQNO);
+                                            sqlCommandUpdate.Parameters.AddWithValue("@SEQNO", seqNo);
                                             sqlCommandUpdate.ExecuteNonQuery();
                                         }
                                     }
@@ -250,24 +224,22 @@ namespace ChipbankImport
                                 string sqlCommandInsert = "INSERT INTO CHIPSYS VALUES(@SYSKEY, @ALOCATEDATE, @SEQNO)";
                                 try
                                 {
-                                    ALOCATEDATE = DateTime.Now.ToString("yyMMdd");
-                                    SqlCommand sqlCommandQuery = new SqlCommand(sqlCommandInsert, connection);
-                                    sqlCommandQuery.Parameters.AddWithValue("@SYSKEY", "01");
-                                    sqlCommandQuery.Parameters.AddWithValue("@ALOCATEDATE", ALOCATEDATE);
-                                    sqlCommandQuery.Parameters.AddWithValue("@SEQNO", 2);
-                                    sqlCommandQuery.ExecuteNonQuery();
-                                    useqno = "0001";
+                                    allocatedDate = DateTime.Now.ToString("yyMMdd");
+                                    using (SqlCommand sqlCommandQuery = new SqlCommand(sqlCommandInsert, connection))
+                                    {
+                                        sqlCommandQuery.Parameters.AddWithValue("@SYSKEY", "01");
+                                        sqlCommandQuery.Parameters.AddWithValue("@ALOCATEDATE", allocatedDate);
+                                        sqlCommandQuery.Parameters.AddWithValue("@SEQNO", 2);
+                                        sqlCommandQuery.ExecuteNonQuery();
+                                        useqno = "0001";
+                                    }
                                 }
                                 catch (SqlException)
                                 {
                                     MainWindow.AlarmBox("Can not connect to the database !!!");
                                 }
-                                finally
-                                {
-                                    connection.Close();
-                                }
                             }
-                            finseqno = $"Q{ALOCATEDATE!.Substring(1, 5)}{useqno}";
+                            finseqno = $"Q{allocatedDate!.Substring(1, 5)}{useqno}";
                         }
                     }
                 }
@@ -277,6 +249,7 @@ namespace ChipbankImport
                 MainWindow.AlarmBox(e.Message);
             }
         }
+
         public static void STOCKINDATA(WaferData GetwaferData)
         {
             string TIMESTAMP = DateTime.Now.ToString();
@@ -382,39 +355,32 @@ namespace ChipbankImport
                 MainWindow.AlarmBox("Can not insert data or connect to the database !!!");
             }
         }
-        public void UnZipLOT(WaferData GetwaferData)
+        public static void UnZipLot(WaferData waferData)
         {
-            string? extractPath = ConfigurationManager.AppSettings["ExtractPath"];
-            string? ChecklotName = ConfigurationManager.AppSettings["ChecklotName"]; /*Shared Folder*/
-            DirectoryInfo directoryInfo = new DirectoryInfo(ChecklotName!);
+            string extractPath = ConfigurationManager.AppSettings["ExtractPath"]!;
+            string checkLotName = ConfigurationManager.AppSettings["ChecklotName"]!; /*Shared Folder*/
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(checkLotName!);
             FileInfo[] files = directoryInfo.GetFiles();
+
             foreach (FileInfo file in files)
             {
                 try
                 {
                     string[] splitName = file.Name.Split('.');
                     string lotName = splitName[0];
-                    string trimLot = GetwaferData.WFLotNo.Replace(" ", "");
-                    string LotpathFolder = extractPath! + trimLot;
-                    if (lotName == trimLot)
+                    string trimmedLot = waferData.WFLotNo.Replace(" ", "");
+                    string lotPathFolder = Path.Combine(extractPath!, trimmedLot);
+
+                    if (lotName == trimmedLot && !file.FullName.EndsWith(".bak"))
                     {
-                        if (Directory.Exists(LotpathFolder))
+                        if (Directory.Exists(lotPathFolder))
                         {
-                            if (!file.FullName.EndsWith(".bak"))
-                            {
-                                Directory.Delete(LotpathFolder, true);
-                                ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
-                                File.Move(file.FullName, file.FullName + ".bak");
-                            }
+                            Directory.Delete(lotPathFolder, true);
                         }
-                        else
-                        {
-                            if (!file.FullName.EndsWith(".bak"))
-                            {
-                                ZipFile.ExtractToDirectory(file.FullName, LotpathFolder);
-                                File.Move(file.FullName, file.FullName + ".bak");
-                            }
-                        }
+
+                        ZipFile.ExtractToDirectory(file.FullName, lotPathFolder);
+                        File.Move(file.FullName, file.FullName + ".bak");
                     }
                 }
                 catch
@@ -432,7 +398,7 @@ namespace ChipbankImport
                     MainWindow.AlarmConditionBox("Confirm Upload ?");
                     if (ModalCondition.setIsyes)
                     {
-                        SETSEQ();
+                        SetSeq();
                         UploadDataFDSheet();
                         MainWindow.AlarmBox("Upload Successfully");
                         Close();
@@ -456,7 +422,7 @@ namespace ChipbankImport
                                 }
                                 else
                                 {
-                                    SETSEQ();
+                                    SetSeq();
                                     UploadDataFDSheet();
                                     MainWindow.AlarmBox("Upload Successfully");
                                     Close();
