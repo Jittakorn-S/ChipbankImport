@@ -13,7 +13,8 @@
         AllowsTransparency="False"
         ResizeMode="CanResize"
         UseLayoutRounding="True"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        ContentRendered="Window_ContentRendered">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="6" />
@@ -34,7 +35,7 @@
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="0 15 0 0"
-                               FontSize="20"
+                               FontSize="22"
                                FontWeight="SemiBold"
                                Text="EDS Data Wafer" />
                 </DockPanel>
@@ -60,7 +61,8 @@
                                   IsReadOnly="True"
                                   AutoGenerateColumns="True"
                                   TextBlock.TextAlignment="Right"
-                                  VerticalScrollBarVisibility="Auto" />
+                                  VerticalScrollBarVisibility="Auto"
+                                  />
                     </materialDesign:ColorZone>
                     <Button x:Name="closeButton"
                             Content="Close"

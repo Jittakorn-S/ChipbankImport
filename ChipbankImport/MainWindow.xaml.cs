@@ -20,7 +20,6 @@ namespace ChipbankImport
         {
             InitializeComponent();
             TextInputBarcode.Focus();
-            AlarmBox("tesTfffffffffffffasddasdasdasdsaffffffffffffffffffff123456");
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -126,7 +125,7 @@ namespace ChipbankImport
                 }
                 else if (CountText == 14)
                 {
-                    ModalSampleLot modalSampleLot = new ModalSampleLot();
+                    ModalEDSSlip modalSampleLot = new ModalEDSSlip();
                     modalSampleLot.zipfileName = TextInputBarcode.Text;
                     modalSampleLot.ShowDialog();
                 }
