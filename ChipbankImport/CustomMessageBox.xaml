@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Height="150"
-        Width="300"
+        Width="auto"
+        MinHeight="150"
+        MaxHeight="150"
         WindowStyle="None"
         AllowsTransparency="False"
         ResizeMode="CanResize"
@@ -14,14 +15,16 @@
         SizeToContent="Width"
         Closing="Window_Closing"
         WindowStartupLocation="CenterScreen">
+
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="5" />
     </WindowChrome.WindowChrome>
+
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
-                         UniformCornerRadius="15"
                          materialDesign:ElevationAssist.Elevation="Dp4"
                          MouseDown="Card_MouseDown">
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -35,16 +38,18 @@
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="20 0 0 0"
-                               FontSize="18"
+                               FontSize="22"
                                FontWeight="SemiBold"
                                Text="Alarm" />
                 </DockPanel>
+
                 <Grid>
-                    <StackPanel Margin="0 10 0 0" MinWidth="300">
+                    <StackPanel Margin="0 10 0 0">
                         <Label x:Name="AlarmText"
                                Content="Get text from function"
-                               Margin="0 0 0 10"
-                               FontSize="16"
+                               Margin="20 0 20 10"
+                               FontSize="18"
+                               Width="auto"
                                HorizontalAlignment="Center" />
                         <Button x:Name="AlarmOK"
                                 Width="100"
@@ -55,7 +60,6 @@
                 </Grid>
             </StackPanel>
             <materialDesign:ColorZone Grid.Column="2"
-                                      CornerRadius="0 15 15 0"
                                       Height="50">
                 <DockPanel>
                     <Button Style="{StaticResource MaterialDesignIconButton}"

@@ -18,7 +18,6 @@
                       ResizeBorderThickness="5" />
     </WindowChrome.WindowChrome>
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
-                         UniformCornerRadius="15"
                          materialDesign:ElevationAssist.Elevation="Dp4"
                          MouseDown="Card_MouseDown">
         <Grid>
@@ -63,7 +62,6 @@
                 </Grid>
             </StackPanel>
             <materialDesign:ColorZone Grid.Column="3"
-                                      CornerRadius="0 15 15 0"
                                       Height="50">
                 <DockPanel>
                     <Button Style="{StaticResource MaterialDesignIconButton}"
