@@ -20,7 +20,6 @@
                       ResizeBorderThickness="5" />
     </WindowChrome.WindowChrome>
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
-                         UniformCornerRadius="15"
                          materialDesign:ElevationAssist.Elevation="Dp4"
                          MouseDown="Card_MouseDown">
         <Grid>
@@ -33,7 +32,6 @@
             <materialDesign:ColorZone Grid.Column="0"
                                       HorizontalAlignment="Stretch"
                                       VerticalAlignment="Stretch"
-                                      CornerRadius="15 0 0 15"
                                       Background="White">
                 <StackPanel Margin="15">
                     <WrapPanel Margin="0 10 0 60"
@@ -131,7 +129,7 @@
                     <Button Style="{StaticResource MaterialDesignIconButton}"
                             materialDesign:RippleAssist.Feedback="LightPink"
                             Foreground="OrangeRed"
-                            materialDesign:ButtonAssist.CornerRadius="6"
+                            materialDesign:ButtonAssist.CornerRadius="1"
                             DockPanel.Dock="Right"
                             HorizontalAlignment="Right"
                             x:Name="exitButton"
