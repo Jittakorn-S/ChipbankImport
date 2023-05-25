@@ -14,7 +14,8 @@
         WindowStartupLocation="CenterScreen"
         StateChanged="Window_StateChanged"
         PreviewMouseDoubleClick="Window_PreviewMouseDoubleClick"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Icon="/chip.ico">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="5" />

@@ -8,16 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="chip.ico" />
     <None Remove="RohmLogo.ico" />
     <None Remove="Untitled.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MaterialDesignThemes" Version="4.8.0" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="chip.ico" />
     <Resource Include="RohmLogo.ico" />
   </ItemGroup>
 
