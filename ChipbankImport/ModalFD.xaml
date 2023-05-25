@@ -32,7 +32,7 @@
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="0 15 0 0"
-                               FontSize="15"
+                               FontSize="22"
                                FontWeight="SemiBold"
                                Text="FD Sheet Data" />
                 </DockPanel>

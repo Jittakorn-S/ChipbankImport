@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Height="150"
+        MinHeight="150"
+        MaxHeight="150"
+        MinWidth="350"
         Width="auto"
         WindowStyle="None"
         AllowsTransparency="False"
@@ -34,7 +36,7 @@
                     <TextBlock HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Margin="20 0 0 0"
-                               FontSize="15"
+                               FontSize="22"
                                FontWeight="SemiBold"
                                Text="Alarm" />
                 </DockPanel>
@@ -43,8 +45,9 @@
                                 MinWidth="300">
                         <Label x:Name="textContent"
                                Content="Get text from function"
-                               Margin="0 0 0 10"
-                               FontSize="16"
+                               Margin="20 0 20 10"
+                               FontSize="20"
+                               Width="auto"
                                HorizontalAlignment="Center" />
                         <Button x:Name="selectYes"
                                 Width="100"
@@ -55,7 +58,7 @@
                         <Button x:Name="selectNo"
                                 Width="100"
                                 Content="No"
-                                Margin="70 -33 -40 0"
+                                Margin="70 -32 -40 0"
                                 Style="{StaticResource MaterialDesignPaperLightButton}"
                                 Click="selectNo_Click" />
                     </StackPanel>

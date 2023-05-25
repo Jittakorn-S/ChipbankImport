@@ -34,6 +34,7 @@ namespace ChipbankImport
         public ModalEDSSlip()
         {
             InitializeComponent();
+            UploadButton.IsEnabled = false;
         }
 
         private void ExitModalFD_Click(object sender, RoutedEventArgs e)
@@ -100,6 +101,7 @@ namespace ChipbankImport
             else
             {
                 MainWindow.AlarmBox("Barcode Mismatch !!!");
+                UploadButton.IsEnabled = false;
             }
         }
         public static void Unzip(string FileName)
@@ -343,7 +345,7 @@ namespace ChipbankImport
                     }
                     else
                     {
-                        getlotStatus = "Normal";
+                        getlotStatus = "Mass Production";
                     }
                 }
             }
@@ -405,10 +407,12 @@ namespace ChipbankImport
                     UploadButton.IsEnabled = false;
                 }
                 isButtoncheckClicked = true;
+                UploadButton.IsEnabled = true;
             }
             else
             {
                 ClearInvoiceValues();
+                UploadButton.IsEnabled = false;
             }
         }
         private void SetInvoiceValues()

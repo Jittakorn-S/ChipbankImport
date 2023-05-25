@@ -213,8 +213,12 @@ namespace ChipbankImport
             string? extractPath = ConfigurationManager.AppSettings["ExtractPath"];
             string? ChecklotName = ConfigurationManager.AppSettings["ChecklotName"]; /*Shared Folder*/
             bool checkLot = false;
+            bool checkFolderlot = false;
 
             DirectoryInfo directoryInfo = new DirectoryInfo(ChecklotName!);
+            DirectoryInfo extractPathcheck = new DirectoryInfo(extractPath!);
+
+            DirectoryInfo[] folder = extractPathcheck.GetDirectories();
             FileInfo[] files = directoryInfo.GetFiles();
 
             totalFiles = files.Length;
@@ -233,15 +237,31 @@ namespace ChipbankImport
                     {
                         if (!file.FullName.EndsWith(".bak"))
                         {
-                            if (!file.Exists)
+                            if (file.Exists)
                             {
-                                ZipFile.ExtractToDirectory(file.FullName, lotPathFolder);
-                                File.Move(file.FullName, file.FullName + ".bak");
-                                checkLot = true;
+                                foreach (DirectoryInfo checkfolder in folder)
+                                {
+                                    string folderName = checkfolder.Name;
+                                    if (folderName == lotName)
+                                    {
+                                        checkFolderlot = true;
+                                    }
+                                }
+                                if (!checkFolderlot)
+                                {
+                                    ZipFile.ExtractToDirectory(file.FullName, lotPathFolder);
+                                    File.Move(file.FullName, file.FullName + ".bak");
+                                    checkLot = true;
+                                }
+                                else
+                                {
+                                    Application.Current.Dispatcher.Invoke(() => AlarmBox("Unzip already, please check !!!"));
+                                    break;
+                                }
                             }
                             else
                             {
-                                Application.Current.Dispatcher.Invoke(() => AlarmBox("This lot has data, please check !!!"));
+                                Application.Current.Dispatcher.Invoke(() => AlarmBox("Not found lot file, please check !!!"));
                             }
                         }
                         else
@@ -270,7 +290,7 @@ namespace ChipbankImport
             {
                 AlarmBox("Upload Successfully !!!");
             }
-            else
+            if (!checkFolderlot && !checkLot)
             {
                 AlarmBox("Not found zip file in CBAll !!!");
             }

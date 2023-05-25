@@ -6,6 +6,7 @@
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Width="auto"
+        MinWidth="250"
         MinHeight="150"
         MaxHeight="150"
         WindowStyle="None"
@@ -48,7 +49,7 @@
                         <Label x:Name="AlarmText"
                                Content="Get text from function"
                                Margin="20 0 20 10"
-                               FontSize="18"
+                               FontSize="20"
                                Width="auto"
                                HorizontalAlignment="Center" />
                         <Button x:Name="AlarmOK"

@@ -39,7 +39,7 @@
                              Value="0" />
                 <TextBlock VerticalAlignment="Center"
                            Margin="0 35 0 0"
-                           FontSize="20"
+                           FontSize="22"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
                            Text="Loading, please wait !!!" />
@@ -48,7 +48,17 @@
             <materialDesign:ColorZone Grid.Column="3"
                                       Height="50">
                 <DockPanel>
-
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            materialDesign:RippleAssist.Feedback="LightPink"
+                            Foreground="OrangeRed"
+                            materialDesign:ButtonAssist.CornerRadius="6"
+                            DockPanel.Dock="Right"
+                            HorizontalAlignment="Right"
+                            x:Name="exitModalProgressbar"
+                            VerticalAlignment="Center"
+                            Click="exitModalProgressbar_Click">
+                        <materialDesign:PackIcon Kind="CloseBold" />
+                    </Button>
                 </DockPanel>
             </materialDesign:ColorZone>
         </Grid>

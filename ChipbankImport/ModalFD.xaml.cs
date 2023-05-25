@@ -167,6 +167,7 @@ namespace ChipbankImport
         {
             try
             {
+                int seqNo = 0;
                 string? allocatedDate = null;
                 string connectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
                 using (SqlConnection connection = new SqlConnection(connectionString))
@@ -181,7 +182,7 @@ namespace ChipbankImport
                             {
                                 while (reader.Read())
                                 {
-                                    int seqNo = (int)reader.GetDecimal(2);
+                                    seqNo = (int)reader.GetDecimal(2);
                                     allocatedDate = reader.GetString(1);
 
                                     if (allocatedDate != DateTime.Now.ToString("yyMMdd"))
@@ -260,7 +261,7 @@ namespace ChipbankImport
             string ReWFDATA2 = WFDATA2.Replace("  0", "   ");
             string ConnetionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
             string sqlInsert = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, OUTDIV," +
-                               " RECDIV, STOCKDATE, WFCOUNT, CHIPCOUNT, SLIPNO, SLIPNOEDA, ORDERNO, INVOICENO, HOLDFLAG, CASENO, WFDATA1, WFDATA2, WFINPUT, " +
+                               " RECDIV, STOCKDATE, WFCOUNT, CHIPCOUNT, SLIPNO, SLIPNOEDA, ORDERNO, INVOICENO, HOLDFLAG, CASENO, DELETEFLAG, WFDATA1, WFDATA2, WFINPUT, " +
                                "TIMESTAMP, RFSEQNO) " +
                                "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @OUTDIV, @RECDIV, @STOCKDATE, @WFCOUNT, " +
                                "@CHIPCOUNT, @SLIPNO, @SLIPNOEDA, @ORDERNO, @INVOICENo, @HOLDFLAG, @CASENO, @tmpdata1, @tmpdata2, @WFINPUT, @TIMESTAMP, @RF_SEQNO)";
@@ -288,6 +289,7 @@ namespace ChipbankImport
                     sqlCommandQuery.Parameters.AddWithValue("@INVOICENo", GetwaferData.InvoiceNo);
                     sqlCommandQuery.Parameters.AddWithValue("@HOLDFLAG", "");
                     sqlCommandQuery.Parameters.AddWithValue("@CASENO", GetwaferData.CaseNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@DELETEFLAG", "");
                     sqlCommandQuery.Parameters.AddWithValue("@tmpdata1", ReWFDATA1);
                     sqlCommandQuery.Parameters.AddWithValue("@tmpdata2", ReWFDATA2);
                     sqlCommandQuery.Parameters.AddWithValue("@WFINPUT", "1");

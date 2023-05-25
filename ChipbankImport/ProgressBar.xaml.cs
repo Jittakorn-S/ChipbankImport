@@ -13,5 +13,10 @@ namespace ChipbankImport
             e.Cancel = true;
             this.Visibility = Visibility.Hidden;
         }
+
+        private void exitModalProgressbar_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 }
