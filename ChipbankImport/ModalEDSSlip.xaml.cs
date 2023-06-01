@@ -89,14 +89,14 @@ namespace ChipbankImport
                         SqlCommand sqlCommandTMP_EDS = new SqlCommand(sqlDeleteTMP_EDS, connection);
                         sqlCommandTMP_EDS.ExecuteNonQuery();
                     }
+                    fileName = $"{waferText}.{zipfileName}.zip";
+                    Unzip(fileName);
+                    ShowValues();
                 }
                 catch (SqlException)
                 {
                     MainWindow.AlarmBox("Can not connect to the database !!!");
                 }
-                fileName = $"{waferText}.{zipfileName}.zip";
-                Unzip(fileName);
-                ShowValues();
             }
             else
             {
@@ -147,251 +147,255 @@ namespace ChipbankImport
                 {
                     MainWindow.AlarmBox("Please check the CBOutput location or the unzip file location !!!");
                 }
-            }
 
-            Directory.SetCurrentDirectory(ChangeDirectory);
+                Directory.SetCurrentDirectory(ChangeDirectory);
 
-            try
-            {
-                ZipFile.ExtractToDirectory(NewCopyCB, ProcessPath);
-            }
-            catch
-            {
-                MainWindow.AlarmBox("Please check the unzip file location !!!");
-            }
-
-            string roblnCsvPath = Path.Combine(ProcessPath, "ROBIN_L.CSV");
-            if (File.Exists(roblnCsvPath))
-            {
-                string[] csvLines = File.ReadAllLines(roblnCsvPath);
-                foreach (string lineText in csvLines)
+                try
                 {
-                    if (countLine == 1)
-                    {
-                        tmp_ChipmodelName = lineText;
-                    }
-                    if (countLine == 7)
-                    {
-                        tmp_invoiceNo = lineText.Trim();
-                    }
-                    countLine++;
+                    ZipFile.ExtractToDirectory(NewCopyCB, ProcessPath);
                 }
-            }
-            else
-            {
-                MainWindow.AlarmBox("Data not exist check ROBIN_L.CSV !!!");
-            }
-
-            string cbInputPath = Path.Combine(ProcessPath, "CBinput.txt");
-            if (File.Exists(cbInputPath))
-            {
-                string[] cbInputLines = File.ReadAllLines(cbInputPath);
-                foreach (string lineText in cbInputLines)
+                catch
                 {
-                    line++;
-                    if (line == 2)
+                    MainWindow.AlarmBox($"Please check zip file in the {ChangeDirectory} location !!!");
+                }
+
+                string roblnCsvPath = Path.Combine(ProcessPath, "ROBIN_L.CSV");
+                if (File.Exists(roblnCsvPath))
+                {
+                    string[] csvLines = File.ReadAllLines(roblnCsvPath);
+                    foreach (string lineText in csvLines)
                     {
-                        tmpwfLotno = lineText;
-                    }
-                    if (line >= 3)
-                    {
-                        WFSEQ = line - 2;
-                        waferChipcount = lineText;
-                        if (waferChipcount != "")
+                        if (countLine == 1)
                         {
-                            if (waferChipcount == "0")
+                            tmp_ChipmodelName = lineText;
+                        }
+                        if (countLine == 7)
+                        {
+                            tmp_invoiceNo = lineText.Trim();
+                        }
+                        countLine++;
+                    }
+                }
+                else
+                {
+                    MainWindow.AlarmBox("Data not exist check ROBIN_L.CSV !!!");
+                }
+
+                string cbInputPath = Path.Combine(ProcessPath, "CBinput.txt");
+                if (File.Exists(cbInputPath))
+                {
+                    string[] cbInputLines = File.ReadAllLines(cbInputPath);
+                    foreach (string lineText in cbInputLines)
+                    {
+                        line++;
+                        if (line == 2)
+                        {
+                            tmpwfLotno = lineText;
+                        }
+                        if (line >= 3)
+                        {
+                            WFSEQ = line - 2;
+                            waferChipcount = lineText;
+                            if (waferChipcount != "")
                             {
-                                wfcountFail++;
-                            }
-                            else
-                            {
-                                if (WFSEQ.ToString().Length == 1)
+                                if (waferChipcount == "0")
                                 {
-                                    resultTmpData = stringBuilder.Append(tmpData).Append("  ").Append(WFSEQ).ToString();
+                                    wfcountFail++;
                                 }
-                                else if (WFSEQ.ToString().Length == 2)
+                                else
                                 {
-                                    resultTmpData = stringBuilder.Append(tmpData).Append(' ').Append(WFSEQ).ToString();
-                                }
-                                else if (WFSEQ.ToString().Length == 3)
-                                {
-                                    resultTmpData = stringBuilder.Append(tmpData).Append(WFSEQ).ToString();
-                                }
-                                if (!string.IsNullOrEmpty(waferChipcount))
-                                {
-                                    sumchipCount += int.Parse(waferChipcount);
-                                    if (waferChipcount!.Length == 1)
+                                    if (WFSEQ.ToString().Length == 1)
                                     {
-                                        resultTmpData = stringBuilder.Append(tmpData).Append("     ").Append(waferChipcount).ToString();
+                                        resultTmpData = stringBuilder.Append(tmpData).Append("  ").Append(WFSEQ).ToString();
                                     }
-                                    else if (waferChipcount!.Length == 2)
+                                    else if (WFSEQ.ToString().Length == 2)
                                     {
-                                        resultTmpData = stringBuilder.Append(tmpData).Append("    ").Append(waferChipcount).ToString();
+                                        resultTmpData = stringBuilder.Append(tmpData).Append(' ').Append(WFSEQ).ToString();
                                     }
-                                    else if (waferChipcount!.Length == 3)
+                                    else if (WFSEQ.ToString().Length == 3)
                                     {
-                                        resultTmpData = stringBuilder.Append(tmpData).Append("   ").Append(waferChipcount).ToString();
+                                        resultTmpData = stringBuilder.Append(tmpData).Append(WFSEQ).ToString();
                                     }
-                                    else if (waferChipcount!.Length == 4)
+                                    if (!string.IsNullOrEmpty(waferChipcount))
                                     {
-                                        resultTmpData = stringBuilder.Append(tmpData).Append("  ").Append(waferChipcount).ToString();
-                                    }
-                                    else if (waferChipcount!.Length == 5)
-                                    {
-                                        resultTmpData = stringBuilder.Append(tmpData).Append(' ').Append(waferChipcount).ToString();
-                                    }
-                                    else if (waferChipcount!.Length == 6)
-                                    {
-                                        resultTmpData = stringBuilder.Append(tmpData).Append(waferChipcount).ToString();
-                                    }
-                                    if (waferChipcount != "0")
-                                    {
-                                        sumwfCount++;
-                                        string sqlInsert = "INSERT INTO WF_EDS (WFLOTNO,WFSEQ,CHIPCOUNT,INVOICENO) " +
-                                                           "VALUES (@WFLOTNO,@WFSEQ,@CHIPCOUNT,@INVOICENO)";
-                                        using (SqlConnection connection = new SqlConnection(ConnectionString))
+                                        sumchipCount += int.Parse(waferChipcount);
+                                        if (waferChipcount!.Length == 1)
                                         {
-                                            connection.Open();
-                                            SqlCommand sqlCommandQuery = new SqlCommand(sqlInsert, connection);
-                                            sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", tmpwfLotno);
-                                            sqlCommandQuery.Parameters.AddWithValue("@WFSEQ", WFSEQ);
-                                            sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", waferChipcount);
-                                            sqlCommandQuery.Parameters.AddWithValue("@INVOICENO", tmp_invoiceNo);
-                                            sqlCommandQuery.ExecuteNonQuery();
+                                            resultTmpData = stringBuilder.Append(tmpData).Append("     ").Append(waferChipcount).ToString();
+                                        }
+                                        else if (waferChipcount!.Length == 2)
+                                        {
+                                            resultTmpData = stringBuilder.Append(tmpData).Append("    ").Append(waferChipcount).ToString();
+                                        }
+                                        else if (waferChipcount!.Length == 3)
+                                        {
+                                            resultTmpData = stringBuilder.Append(tmpData).Append("   ").Append(waferChipcount).ToString();
+                                        }
+                                        else if (waferChipcount!.Length == 4)
+                                        {
+                                            resultTmpData = stringBuilder.Append(tmpData).Append("  ").Append(waferChipcount).ToString();
+                                        }
+                                        else if (waferChipcount!.Length == 5)
+                                        {
+                                            resultTmpData = stringBuilder.Append(tmpData).Append(' ').Append(waferChipcount).ToString();
+                                        }
+                                        else if (waferChipcount!.Length == 6)
+                                        {
+                                            resultTmpData = stringBuilder.Append(tmpData).Append(waferChipcount).ToString();
+                                        }
+                                        if (waferChipcount != "0")
+                                        {
+                                            sumwfCount++;
+                                            string sqlInsert = "INSERT INTO WF_EDS (WFLOTNO,WFSEQ,CHIPCOUNT,INVOICENO) " +
+                                                               "VALUES (@WFLOTNO,@WFSEQ,@CHIPCOUNT,@INVOICENO)";
+                                            using (SqlConnection connection = new SqlConnection(ConnectionString))
+                                            {
+                                                connection.Open();
+                                                SqlCommand sqlCommandQuery = new SqlCommand(sqlInsert, connection);
+                                                sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", tmpwfLotno);
+                                                sqlCommandQuery.Parameters.AddWithValue("@WFSEQ", WFSEQ);
+                                                sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", waferChipcount);
+                                                sqlCommandQuery.Parameters.AddWithValue("@INVOICENO", tmp_invoiceNo);
+                                                sqlCommandQuery.ExecuteNonQuery();
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    if (resultTmpData!.Length <= 180)
+                    {
+                        tmpData1 = resultTmpData!.Substring(0, Math.Min(resultTmpData.Length, 180));
+                        tmpData2 = "";
+                    }
+                    else
+                    {
+                        tmpData1 = resultTmpData!.Substring(0, Math.Min(resultTmpData.Length, 180));
+                        tmpData2 = resultTmpData!.Substring(180, Math.Max(0, Math.Min(resultTmpData.Length - 180, 180)));
+                    }
                 }
-                if (resultTmpData!.Length <= 180)
+
+                ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+                string ConnetionStringMapOnline = ConfigurationManager.AppSettings["ConnetionStringMapOnline"]!;
+                string sqlSelectWFSEQ = "SELECT WFSEQ, CHIPCOUNT FROM WF_EDS ORDER BY WFSEQ";
+                string sqlSelectCHIPMASTER = "SELECT * FROM CHIPMASTER WHERE CHIPMODELNAME = @tmp_ChipmodelName";
+                string sqlselectSample = "SELECT DeviceName, LotNo, FlagLastShipout FROM MapOnline.dbo.EDSFlow " +
+                                         "WHERE DeviceName LIKE '%8' AND LotNo = @LotNo AND FlowName = 'output' AND FlagLastShipout = 1";
+
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
                 {
-                    tmpData1 = resultTmpData!.Substring(0, Math.Min(resultTmpData.Length, 180));
-                    tmpData2 = "";
+                    connection.Open();
+                    SqlCommand sqlCommandQueryChip = new SqlCommand(sqlSelectCHIPMASTER, connection);
+                    sqlCommandQueryChip.Parameters.AddWithValue("@tmp_ChipmodelName", tmp_ChipmodelName);
+
+                    using (SqlDataReader readerQueryChip = sqlCommandQueryChip.ExecuteReader())
+                    {
+                        if (readerQueryChip.HasRows)
+                        {
+                            foreach (DbDataRecord record in readerQueryChip)
+                            {
+                                getplasmaStatus = (string?)record.GetValue(1);
+                            }
+                        }
+                        else
+                        {
+                            getplasmaStatus = " ";
+                        }
+                    }
+
+                    SqlCommand sqlCommandQueryWF = new SqlCommand(sqlSelectWFSEQ, connection);
+
+                    using (SqlDataReader readerQueryWF = sqlCommandQueryWF.ExecuteReader())
+                    {
+                        if (readerQueryWF.HasRows)
+                        {
+                            dataWFSEQ = new DataTable();
+                            for (int i = 0; i < readerQueryWF.FieldCount; i++)
+                            {
+                                dataWFSEQ.Columns.Add(readerQueryWF.GetName(i), readerQueryWF.GetFieldType(i));
+                            }
+
+                            while (readerQueryWF.Read())
+                            {
+                                DataRow row = dataWFSEQ.NewRow();
+
+                                for (int i = 0; i < readerQueryWF.FieldCount; i++)
+                                {
+                                    row[i] = readerQueryWF[i];
+                                }
+                                dataWFSEQ.Rows.Add(row);
+                            }
+                        }
+                    }
+                }
+
+                using (SqlConnection connectionMapOnline = new SqlConnection(ConnetionStringMapOnline))
+                {
+                    connectionMapOnline.Open();
+                    SqlCommand sqlCommandQuerySample = new SqlCommand(sqlselectSample, connectionMapOnline);
+                    sqlCommandQuerySample.Parameters.AddWithValue("@LotNo", tmpwfLotno);
+
+                    using (SqlDataReader readerQuerysample = sqlCommandQuerySample.ExecuteReader())
+                    {
+                        if (readerQuerysample.HasRows)
+                        {
+                            getlotStatus = "Sample";
+                        }
+                        else
+                        {
+                            getlotStatus = "Mass Production";
+                        }
+                    }
+                }
+
+                string TMP_CASENO = "      ";
+                string TMP_OUTDIV = "QI830";
+                string TMP_RECDIV = "TI970";
+                string checkDigit = tmpwfLotno!.Substring(0, 1);
+
+                if (Char.IsDigit(checkDigit[0]))
+                {
+                    TMP_ORDERNO = "E" + tmpwfLotno;
                 }
                 else
                 {
-                    tmpData1 = resultTmpData!.Substring(0, Math.Min(resultTmpData.Length, 180));
-                    tmpData2 = resultTmpData!.Substring(180, Math.Max(0, Math.Min(resultTmpData.Length - 180, 180)));
+                    TMP_ORDERNO = tmpwfLotno;
                 }
-            }
 
-            ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-            string ConnetionStringMapOnline = ConfigurationManager.AppSettings["ConnetionStringMapOnline"]!;
-            string sqlSelectWFSEQ = "SELECT WFSEQ, CHIPCOUNT FROM WF_EDS ORDER BY WFSEQ";
-            string sqlSelectCHIPMASTER = "SELECT * FROM CHIPMASTER WHERE CHIPMODELNAME = @tmp_ChipmodelName";
-            string sqlselectSample = "SELECT DeviceName, LotNo, FlagLastShipout FROM MapOnline.dbo.EDSFlow " +
-                                     "WHERE DeviceName LIKE '%8' AND LotNo = @LotNo AND FlowName = 'output' AND FlagLastShipout = 1";
+                SetSeq();
 
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                connection.Open();
-                SqlCommand sqlCommandQueryChip = new SqlCommand(sqlSelectCHIPMASTER, connection);
-                sqlCommandQueryChip.Parameters.AddWithValue("@tmp_ChipmodelName", tmp_ChipmodelName);
+                string sqlInsertTMP_EDS = "INSERT INTO TMP_EDS (CHIPMODELNAME,WFLOTNO,WFCOUNT,CHIPCOUNT,INVOICENO,CASENO,OUTDIV,RECDIV,ORDERNO,PLASMA,WFDATA1,WFDATA2,SEQNO,WFCOUNT_FAIL) " +
+                                          "VALUES (@CHIPMODELNAME, @WFLOTNO, @WFCOUNT, @CHIPCOUNT, @INVOICENO, @CASENO, @OUTDIV, @RECDIV, @ORDERNO, @PLASMA, @WFDATA1, @WFDATA2, @SEQNO, @WFCOUNT_FAIL)";
 
-                using (SqlDataReader readerQueryChip = sqlCommandQueryChip.ExecuteReader())
+                string ALOCATEDATE = DateTime.Now.ToString("yyMMdd");
+                string useqno = "0001";
+                finseqno = $"Q{ALOCATEDATE!.Substring(1, 5)}{useqno}";
+
+                using (SqlConnection connection = new SqlConnection(ConnectionString))
                 {
-                    if (readerQueryChip.HasRows)
-                    {
-                        foreach (DbDataRecord record in readerQueryChip)
-                        {
-                            getplasmaStatus = (string?)record.GetValue(1);
-                        }
-                    }
-                    else
-                    {
-                        getplasmaStatus = " ";
-                    }
+                    connection.Open();
+                    SqlCommand sqlCommandQuery = new SqlCommand(sqlInsertTMP_EDS, connection);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", tmp_ChipmodelName);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", tmpwfLotno);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT", sumwfCount);
+                    sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", sumchipCount);
+                    sqlCommandQuery.Parameters.AddWithValue("@INVOICENO", tmp_invoiceNo);
+                    sqlCommandQuery.Parameters.AddWithValue("@CASENO", TMP_CASENO);
+                    sqlCommandQuery.Parameters.AddWithValue("@OUTDIV", TMP_OUTDIV);
+                    sqlCommandQuery.Parameters.AddWithValue("@RECDIV", TMP_RECDIV);
+                    sqlCommandQuery.Parameters.AddWithValue("@ORDERNO", TMP_ORDERNO);
+                    sqlCommandQuery.Parameters.AddWithValue("@PLASMA", getplasmaStatus);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFDATA1", tmpData1);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFDATA2", tmpData2);
+                    sqlCommandQuery.Parameters.AddWithValue("@SEQNO", finseqno);
+                    sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT_FAIL", wfcountFail);
+                    sqlCommandQuery.ExecuteNonQuery();
                 }
-
-                SqlCommand sqlCommandQueryWF = new SqlCommand(sqlSelectWFSEQ, connection);
-
-                using (SqlDataReader readerQueryWF = sqlCommandQueryWF.ExecuteReader())
-                {
-                    if (readerQueryWF.HasRows)
-                    {
-                        dataWFSEQ = new DataTable();
-                        for (int i = 0; i < readerQueryWF.FieldCount; i++)
-                        {
-                            dataWFSEQ.Columns.Add(readerQueryWF.GetName(i), readerQueryWF.GetFieldType(i));
-                        }
-
-                        while (readerQueryWF.Read())
-                        {
-                            DataRow row = dataWFSEQ.NewRow();
-
-                            for (int i = 0; i < readerQueryWF.FieldCount; i++)
-                            {
-                                row[i] = readerQueryWF[i];
-                            }
-                            dataWFSEQ.Rows.Add(row);
-                        }
-                    }
-                }
-            }
-
-            using (SqlConnection connectionMapOnline = new SqlConnection(ConnetionStringMapOnline))
-            {
-                connectionMapOnline.Open();
-                SqlCommand sqlCommandQuerySample = new SqlCommand(sqlselectSample, connectionMapOnline);
-                sqlCommandQuerySample.Parameters.AddWithValue("@LotNo", tmpwfLotno);
-
-                using (SqlDataReader readerQuerysample = sqlCommandQuerySample.ExecuteReader())
-                {
-                    if (readerQuerysample.HasRows)
-                    {
-                        getlotStatus = "Sample";
-                    }
-                    else
-                    {
-                        getlotStatus = "Mass Production";
-                    }
-                }
-            }
-
-            string TMP_CASENO = "      ";
-            string TMP_OUTDIV = "QI830";
-            string TMP_RECDIV = "TI970";
-            string checkDigit = tmpwfLotno!.Substring(0, 1);
-
-            if (Char.IsDigit(checkDigit[0]))
-            {
-                TMP_ORDERNO = "E" + tmpwfLotno;
             }
             else
             {
-                TMP_ORDERNO = tmpwfLotno;
-            }
-
-            SetSeq();
-
-            string sqlInsertTMP_EDS = "INSERT INTO TMP_EDS (CHIPMODELNAME,WFLOTNO,WFCOUNT,CHIPCOUNT,INVOICENO,CASENO,OUTDIV,RECDIV,ORDERNO,PLASMA,WFDATA1,WFDATA2,SEQNO,WFCOUNT_FAIL) " +
-                                      "VALUES (@CHIPMODELNAME, @WFLOTNO, @WFCOUNT, @CHIPCOUNT, @INVOICENO, @CASENO, @OUTDIV, @RECDIV, @ORDERNO, @PLASMA, @WFDATA1, @WFDATA2, @SEQNO, @WFCOUNT_FAIL)";
-
-            string ALOCATEDATE = DateTime.Now.ToString("yyMMdd");
-            string useqno = "0001";
-            finseqno = $"Q{ALOCATEDATE!.Substring(1, 5)}{useqno}";
-
-            using (SqlConnection connection = new SqlConnection(ConnectionString))
-            {
-                connection.Open();
-                SqlCommand sqlCommandQuery = new SqlCommand(sqlInsertTMP_EDS, connection);
-                sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", tmp_ChipmodelName);
-                sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", tmpwfLotno);
-                sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT", sumwfCount);
-                sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", sumchipCount);
-                sqlCommandQuery.Parameters.AddWithValue("@INVOICENO", tmp_invoiceNo);
-                sqlCommandQuery.Parameters.AddWithValue("@CASENO", TMP_CASENO);
-                sqlCommandQuery.Parameters.AddWithValue("@OUTDIV", TMP_OUTDIV);
-                sqlCommandQuery.Parameters.AddWithValue("@RECDIV", TMP_RECDIV);
-                sqlCommandQuery.Parameters.AddWithValue("@ORDERNO", TMP_ORDERNO);
-                sqlCommandQuery.Parameters.AddWithValue("@PLASMA", getplasmaStatus);
-                sqlCommandQuery.Parameters.AddWithValue("@WFDATA1", tmpData1);
-                sqlCommandQuery.Parameters.AddWithValue("@WFDATA2", tmpData2);
-                sqlCommandQuery.Parameters.AddWithValue("@SEQNO", finseqno);
-                sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT_FAIL", wfcountFail);
-                sqlCommandQuery.ExecuteNonQuery();
+                MainWindow.AlarmBox("Lot file zip not found, Please check !!!");
             }
         }
 
@@ -599,7 +603,7 @@ namespace ChipbankImport
                 try
                 {
                     ZipFile.ExtractToDirectory(FileToCopy, ExtractPath + LotNo);
-                    File.Move(FileToCopy, destinationFilePath, true);
+                    File.Move(FileToCopy, destinationFilePath + ".bak", true);
                 }
                 catch (Exception)
                 {

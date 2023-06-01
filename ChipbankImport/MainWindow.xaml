@@ -15,7 +15,7 @@
         StateChanged="Window_StateChanged"
         PreviewMouseDoubleClick="Window_PreviewMouseDoubleClick"
         Loaded="Window_Loaded"
-        Icon="/chip.ico">
+        Icon="/Icon.png">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="5" />
@@ -38,21 +38,10 @@
                     <WrapPanel Margin="0 10 0 60"
                                HorizontalAlignment="Center">
                         <Image RenderOptions.BitmapScalingMode="HighQuality"
-                               Height="40"
-                               Width="40"
-                               Source="RohmLogo.ico">
-                            <Image.Clip>
-                                <RectangleGeometry RadiusX="20"
-                                                   RadiusY="20"
-                                                   Rect="0,0,40,40" />
-                            </Image.Clip>
+                               Height="80"
+                               Width="200"
+                               Source="/ChipBank.png">
                         </Image>
-                        <TextBlock Text="Chipbank Import"
-                                   FontSize="21"
-                                   FontWeight="Bold"
-                                   HorizontalAlignment="left"
-                                   VerticalAlignment="Center"
-                                   Margin="10 0 0 0" />
                     </WrapPanel>
                     <Button Style="{StaticResource MaterialDesignFlatButton}"
                             Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
@@ -60,13 +49,41 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             materialDesign:RippleAssist.Feedback="White"
-                            Margin="0 0 0 15"
+                            Margin="0 -20 0 0"
+                            Height="50"
+                            Click="Button_Click">
+                        <WrapPanel Width="120" Height="auto">
+                            <materialDesign:PackIcon Kind="Administrator"
+                                                     VerticalAlignment="Stretch"
+                                                     HorizontalAlignment="Stretch"
+                                                     Foreground="OrangeRed"
+                                                     Height="20"
+                                                     Width="20"
+                                                     Margin="0 0 15 0" />
+                            
+                            <TextBlock  FontSize="16" Margin="0 -1.5 0 0">
+                                Special
+                            </TextBlock>
+                        </WrapPanel>
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                            materialDesign:ButtonAssist.CornerRadius="6"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            materialDesign:RippleAssist.Feedback="White"
+                            Margin="0 20 0 0"
+                            Height="50"
                             Click="Button_Click">
                         <WrapPanel Width="120">
                             <materialDesign:PackIcon Kind="ExitToApp"
                                                      VerticalAlignment="Center"
-                                                     Margin="0 0 20 0" />
-                            <TextBlock>
+                                                     Foreground="OrangeRed"
+                                                     Width="20"
+                                                     Height="20"
+                                                     Margin="0 0 15 0" />
+                            <TextBlock FontSize="16"
+                                       Margin="0 -1.5 0 0">
                                 Exit
                             </TextBlock>
                         </WrapPanel>

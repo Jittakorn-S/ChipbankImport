@@ -125,9 +125,9 @@ namespace ChipbankImport
                 }
                 else if (CountText == 14)
                 {
-                    ModalEDSSlip modalSampleLot = new ModalEDSSlip();
-                    modalSampleLot.zipfileName = TextInputBarcode.Text;
-                    modalSampleLot.ShowDialog();
+                    ModalEDSSlip modalEDSSlip = new ModalEDSSlip();
+                    modalEDSSlip.zipfileName = TextInputBarcode.Text;
+                    modalEDSSlip.ShowDialog();
                 }
                 else
                 {
@@ -239,8 +239,9 @@ namespace ChipbankImport
                         {
                             if (file.Exists)
                             {
-                                foreach (DirectoryInfo checkfolder in folder)
+                                for (int i = 0; i < folder.Length; i++)
                                 {
+                                    DirectoryInfo checkfolder = folder[i];
                                     string folderName = checkfolder.Name;
                                     if (folderName == lotName)
                                     {
@@ -249,9 +250,16 @@ namespace ChipbankImport
                                 }
                                 if (!checkFolderlot)
                                 {
-                                    ZipFile.ExtractToDirectory(file.FullName, lotPathFolder);
-                                    File.Move(file.FullName, file.FullName + ".bak");
-                                    checkLot = true;
+                                    try
+                                    {
+                                        ZipFile.ExtractToDirectory(file.FullName, lotPathFolder);
+                                        File.Move(file.FullName, file.FullName + ".bak");
+                                        checkLot = true;
+                                    }
+                                    catch
+                                    {
+                                        break;
+                                    }
                                 }
                                 else
                                 {
@@ -261,7 +269,7 @@ namespace ChipbankImport
                             }
                             else
                             {
-                                Application.Current.Dispatcher.Invoke(() => AlarmBox("Not found lot file, please check !!!"));
+                                Application.Current.Dispatcher.Invoke(() => AlarmBox("Not found LOT file, please check !!!"));
                             }
                         }
                         else

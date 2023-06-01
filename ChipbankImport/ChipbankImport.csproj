@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="chip.ico" />
-    <None Remove="RohmLogo.ico" />
+    <None Remove="ChipBank.png" />
+    <None Remove="Icon.png" />
     <None Remove="Untitled.png" />
   </ItemGroup>
 
@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="chip.ico" />
-    <Resource Include="RohmLogo.ico" />
+    <Resource Include="ChipBank.png" />
+    <Resource Include="Icon.png" />
   </ItemGroup>
 
 </Project>
