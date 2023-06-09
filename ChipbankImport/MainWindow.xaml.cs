@@ -30,9 +30,14 @@ namespace ChipbankImport
         {
             Application.Current.Shutdown();
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void sideExitButton_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+        private void specialButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoginModal loginModal = new LoginModal();
+            loginModal.Show();
         }
         private void Card_MouseDown(object sender, MouseButtonEventArgs e)
         {

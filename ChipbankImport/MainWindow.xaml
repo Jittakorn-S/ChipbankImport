@@ -51,8 +51,9 @@
                             materialDesign:RippleAssist.Feedback="White"
                             Margin="0 -20 0 0"
                             Height="50"
-                            Click="Button_Click">
-                        <WrapPanel Width="120" Height="auto">
+                            x:Name="specialButton"
+                            Click="specialButton_Click">
+                        <WrapPanel Width="130" Height="auto">
                             <materialDesign:PackIcon Kind="Administrator"
                                                      VerticalAlignment="Stretch"
                                                      HorizontalAlignment="Stretch"
@@ -62,7 +63,7 @@
                                                      Margin="0 0 15 0" />
                             
                             <TextBlock  FontSize="16" Margin="0 -1.5 0 0">
-                                Special
+                                Special Input
                             </TextBlock>
                         </WrapPanel>
                     </Button>
@@ -74,8 +75,9 @@
                             materialDesign:RippleAssist.Feedback="White"
                             Margin="0 20 0 0"
                             Height="50"
-                            Click="Button_Click">
-                        <WrapPanel Width="120">
+                            x:Name="sideExitButton"
+                            Click="sideExitButton_Click">
+                        <WrapPanel Width="130">
                             <materialDesign:PackIcon Kind="ExitToApp"
                                                      VerticalAlignment="Center"
                                                      Foreground="OrangeRed"

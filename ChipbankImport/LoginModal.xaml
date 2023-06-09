@@ -1,26 +1,27 @@
-﻿<Window x:Class="ChipbankImport.ModalFD"
+﻿<Window x:Class="ChipbankImport.LoginModal"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        MaxHeight="450"
-        MinHeight="450"
-        MaxWidth="800"
+        MinHeight="370"
+        MaxHeight="370"
         MinWidth="800"
+        MaxWidth="800"
         WindowStyle="None"
         AllowsTransparency="False"
         ResizeMode="CanResize"
         UseLayoutRounding="True"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        MouseDown="Window_MouseDown">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"
                       ResizeBorderThickness="5" />
     </WindowChrome.WindowChrome>
     <materialDesign:Card Background="{DynamicResource MaterialDesignPaper}"
                          materialDesign:ElevationAssist.Elevation="Dp4"
-                         MouseDown="FDModal_MouseDown">
+                        >
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -36,9 +37,13 @@
                                Margin="0 15 0 0"
                                FontSize="22"
                                FontWeight="SemiBold"
-                               Text="FD Sheet Data" />
+                               Text="Login" />
                 </DockPanel>
                 <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44*" />
+                        <ColumnDefinition Width="455*" />
+                    </Grid.ColumnDefinitions>
                     <materialDesign:ColorZone Grid.Column="0"
                                               Mode="Custom"
                                               Background="White"
@@ -46,38 +51,30 @@
                                               CornerRadius="15"
                                               Padding="55"
                                               Margin="0 20 0 0"
-                                              HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Stretch">
+                                              VerticalAlignment="Stretch"
+                                              Grid.ColumnSpan="2">
                         <StackPanel>
                             <StackPanel>
-                                <TextBox x:Name="InvoiceTextbox"
-                                         materialDesign:HintAssist.Hint="Invoice No."
+                                <TextBox x:Name="userTextBox"
+                                         materialDesign:HintAssist.Hint="Employee No."
                                          MaxWidth="400"
-                                         IsEnabled="False"
                                          FontSize="20"
                                          Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                         Loaded="InvoiceTextbox_Loaded" />
-                                <TextBox x:Name="LotNoTextbox"
-                                         materialDesign:HintAssist.Hint="LOT"
-                                         MaxWidth="400"
-                                         IsEnabled="False"
-                                         Margin="0 20 0 0"
-                                         FontSize="20"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                                         KeyDown="userTextBox_KeyDown" />
                             </StackPanel>
                         </StackPanel>
                     </materialDesign:ColorZone>
                 </Grid>
                 <StackPanel>
-                    <Button x:Name="UploadButton"
-                            Margin="0 20 0 0"
-                            Content="Upload"
+                    <Button x:Name="loginButton"
+                            Margin="0 30 0 0"
+                            Content="Login"
                             Width="300"
                             Height="50"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center"
                             Style="{StaticResource MaterialDesignPaperLightButton}"
-                            Click="UploadButton_Click" />
+                            Click="loginButton_Click" />
                 </StackPanel>
             </StackPanel>
 
@@ -90,9 +87,9 @@
                             materialDesign:ButtonAssist.CornerRadius="6"
                             DockPanel.Dock="Right"
                             HorizontalAlignment="Right"
-                            x:Name="ExitModalFD"
+                            x:Name="ExitModalLogin"
                             VerticalAlignment="Center"
-                            Click="exitModal_Click">
+                            Click="ExitModalLogin_Click">
                         <materialDesign:PackIcon Kind="CloseBold" />
                     </Button>
                 </DockPanel>
