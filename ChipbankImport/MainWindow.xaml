@@ -77,7 +77,7 @@
                             Margin="0 8 0 0"
                             x:Name="sideExitButton"
                             Click="sideExitButton_Click">
-                        <WrapPanel Width="100">
+                        <WrapPanel Width="90">
                             <materialDesign:PackIcon Kind="ExitToApp"
                                                      VerticalAlignment="Center"
                                                      Foreground="OrangeRed"
