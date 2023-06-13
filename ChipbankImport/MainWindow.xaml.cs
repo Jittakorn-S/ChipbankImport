@@ -173,7 +173,7 @@ namespace ChipbankImport
                 }
                 catch (Exception)
                 {
-                    AlarmBox("Please check location file");
+                    AlarmBox($"Please check location file {FileToCopy} or {NewCopyCB}");
                 }
             }
             try
@@ -183,7 +183,7 @@ namespace ChipbankImport
             }
             catch (Exception)
             {
-                AlarmBox("Please check location file");
+                AlarmBox($"Please check location file {NewCopyCB} or {ProcessPath}");
             }
 
             if (System.IO.File.Exists(ProcessPath + @"\FD\Refidc02.fd"))

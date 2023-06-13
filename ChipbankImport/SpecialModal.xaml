@@ -57,23 +57,24 @@
                         <StackPanel>
                             <StackPanel>
                                 <TextBox x:Name="barcodeInput"
-                                         materialDesign:HintAssist.Hint="Scan Barcode"
-                                         MaxWidth="400"
+                                         materialDesign:HintAssist.Hint="Scan the barcode"
                                          FontSize="20"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         KeyDown="barcodeInput_KeyDown" />
                             </StackPanel>
                         </StackPanel>
                     </materialDesign:ColorZone>
                 </Grid>
                 <StackPanel>
-                    <Button x:Name="UploadButton"
-                            Margin="0 30 0 0"
-                            Content="Upload"
+                    <Button x:Name="enterButton"
+                            Margin="0 35 0 0"
+                            Content="Enter"
                             Width="300"
                             Height="50"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center"
-                            Style="{StaticResource MaterialDesignPaperLightButton}" />
+                            Style="{StaticResource MaterialDesignPaperLightButton}"
+                            Click="enterButton_Click" />
                 </StackPanel>
             </StackPanel>
 
