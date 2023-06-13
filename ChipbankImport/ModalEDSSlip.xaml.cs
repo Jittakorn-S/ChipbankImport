@@ -35,6 +35,7 @@ namespace ChipbankImport
         {
             InitializeComponent();
             UploadButton.IsEnabled = false;
+            waferLot.Focus();
         }
 
         private void ExitModalFD_Click(object sender, RoutedEventArgs e)
@@ -74,7 +75,7 @@ namespace ChipbankImport
         private void checkButton_Click(object sender, RoutedEventArgs e)
         {
             string waferText = waferLot.Text.ToString().Trim('.');
-            if (waferText != "" && waferText.Length == 11 && !waferLot.Text.Contains('.'))
+            if (waferText != "" && waferText.Length == 11 || waferText.Length == 10 && !waferLot.Text.Contains('.'))
             {
                 try
                 {

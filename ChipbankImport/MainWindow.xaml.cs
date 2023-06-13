@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace ChipbankImport
         public MainWindow()
         {
             InitializeComponent();
+            InputLanguageManager.SetInputLanguage(TextInputBarcode, CultureInfo.CreateSpecificCulture("en-US"));
             TextInputBarcode.Focus();
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
