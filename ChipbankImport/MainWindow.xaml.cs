@@ -28,6 +28,14 @@ namespace ChipbankImport
             restoreScreenButton.Visibility = Visibility.Collapsed;
             WindowState = WindowState.Normal;
         }
+        private void TextInputBarcode_Initialized(object sender, EventArgs e)
+        {
+            InputLanguageManager.SetInputLanguage(TextInputBarcode, CultureInfo.CreateSpecificCulture("en-US"));
+        }
+        private void TextInputBarcode_GotFocus(object sender, RoutedEventArgs e)
+        {
+            InputLanguageManager.SetInputLanguage(TextInputBarcode, CultureInfo.CreateSpecificCulture("en-US"));
+        }
         private void exitButton_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
@@ -41,6 +49,7 @@ namespace ChipbankImport
             LoginModal loginModal = new LoginModal();
             loginModal.Show();
         }
+
         private void Card_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -69,6 +78,7 @@ namespace ChipbankImport
         }
         private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
+            InputLanguageManager.SetInputLanguage(TextInputBarcode, CultureInfo.CreateSpecificCulture("en-US"));
             if (e.Key == Key.Enter)
             {
                 submitButton_Click(sender, e);
@@ -322,5 +332,7 @@ namespace ChipbankImport
             ModalCondition.textContent.Content = textMessage;
             ModalCondition.ShowDialog();
         }
+
+
     }
 }

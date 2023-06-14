@@ -43,7 +43,7 @@
                                Source="/ChipBank.png">
                         </Image>
                     </WrapPanel>
-                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                    <!--<Button Style="{StaticResource MaterialDesignFlatButton}"
                             Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
                             materialDesign:ButtonAssist.CornerRadius="6"
                             HorizontalAlignment="Stretch"
@@ -66,14 +66,14 @@
                                 Special Input
                             </TextBlock>
                         </WrapPanel>
-                    </Button>
+                    </Button>-->
                     <Button Style="{StaticResource MaterialDesignFlatButton}"
                             Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
                             materialDesign:ButtonAssist.CornerRadius="6"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             materialDesign:RippleAssist.Feedback="White"
-                            Margin="0 20 0 0"
+                            Margin="0 7 0 0"
                             Height="50"
                             x:Name="sideExitButton"
                             Click="sideExitButton_Click">
@@ -100,7 +100,7 @@
                                Margin="0 10 0 0"
                                FontSize="22"
                                FontWeight="SemiBold"
-                               Text="FD Sheet And EDS Slip" />
+                               Text="FD Sheet and EDS Slip" />
                 </DockPanel>
                 <Grid>
                     <materialDesign:ColorZone Grid.Column="0"
@@ -127,7 +127,9 @@
                                          SelectionBrush="#FF8D8C8E"
                                          Background="Transparent"
                                          SelectionTextBrush="#FF0A0000"
-                                         KeyDown="TextBox_KeyDown" />
+                                         KeyDown="TextBox_KeyDown"
+                                         Initialized="TextInputBarcode_Initialized"
+                                         GotFocus="TextInputBarcode_GotFocus" />
                             </StackPanel>
                             <StackPanel>
                                 <Button x:Name="submitButton"
