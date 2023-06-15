@@ -149,6 +149,7 @@ namespace ChipbankImport
                 else
                 {
                     AlarmBox("Barcode Mismatch !!!");
+                    TextInputBarcode.Clear();
                     TextInputBarcode.Focus();
                 }
                 TextInputBarcode.Clear();
@@ -157,6 +158,7 @@ namespace ChipbankImport
             else
             {
                 AlarmBox("Barcode Mismatch !!!");
+                TextInputBarcode.Clear();
                 TextInputBarcode.Focus();
             }
         }

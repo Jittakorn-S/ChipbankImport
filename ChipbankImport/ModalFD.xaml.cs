@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
-using System.Data.SqlClient;
+using System.Data;
+using System.Data.OleDb;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -177,13 +178,14 @@ namespace ChipbankImport
                 int seqNo = 0;
                 string? allocatedDate = null;
                 string connectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (OleDbConnection connection = new OleDbConnection(connectionString))
                 {
                     connection.Open();
-                    using (SqlCommand sqlCommand = new SqlCommand("SELECT * FROM CHIPSYS WHERE SYSKEY = @SYSKEY", connection))
+                    using (OleDbCommand sqlCommand = new OleDbCommand("SELECT * FROM CHIPSYS WHERE SYSKEY = ?", connection))
                     {
-                        sqlCommand.Parameters.AddWithValue("@SYSKEY", "01");
-                        using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                        sqlCommand.CommandType = CommandType.Text;
+                        sqlCommand.Parameters.AddWithValue("?", "01");
+                        using (OleDbDataReader reader = sqlCommand.ExecuteReader())
                         {
                             if (reader.HasRows)
                             {
@@ -195,11 +197,12 @@ namespace ChipbankImport
                                     if (allocatedDate != DateTime.Now.ToString("yyMMdd"))
                                     {
                                         allocatedDate = DateTime.Now.ToString("yyMMdd");
-                                        using (SqlCommand sqlCommandUpdate = new SqlCommand("UPDATE CHIPSYS " +
-                                                                                             "SET ALOCATEDATE = @ALOCATEDATE, SEQNO = 2 " +
+                                        using (OleDbCommand sqlCommandUpdate = new OleDbCommand("UPDATE CHIPSYS " +
+                                                                                             "SET ALOCATEDATE = ?, SEQNO = 2 " +
                                                                                              "WHERE SYSKEY = '01'", connection))
                                         {
-                                            sqlCommandUpdate.Parameters.AddWithValue("@ALOCATEDATE", allocatedDate);
+                                            sqlCommandUpdate.CommandType = CommandType.Text;
+                                            sqlCommandUpdate.Parameters.AddWithValue("?", allocatedDate);
                                             sqlCommandUpdate.ExecuteNonQuery();
                                             useqno = "0001";
                                         }
@@ -217,11 +220,12 @@ namespace ChipbankImport
                                         };
                                         seqNo++;
 
-                                        using (SqlCommand sqlCommandUpdate = new SqlCommand("UPDATE CHIPSYS " +
-                                                                     "SET SEQNO = @SEQNO " +
+                                        using (OleDbCommand sqlCommandUpdate = new OleDbCommand("UPDATE CHIPSYS " +
+                                                                     "SET SEQNO = ? " +
                                                                      "WHERE SYSKEY = '01'", connection))
                                         {
-                                            sqlCommandUpdate.Parameters.AddWithValue("@SEQNO", seqNo);
+                                            sqlCommandUpdate.CommandType = CommandType.Text;
+                                            sqlCommandUpdate.Parameters.AddWithValue("?", seqNo);
                                             sqlCommandUpdate.ExecuteNonQuery();
                                         }
                                     }
@@ -229,20 +233,21 @@ namespace ChipbankImport
                             }
                             else
                             {
-                                string sqlCommandInsert = "INSERT INTO CHIPSYS VALUES(@SYSKEY, @ALOCATEDATE, @SEQNO)";
+                                string sqlCommandInsert = "INSERT INTO CHIPSYS VALUES(?, ?, ?)";
                                 try
                                 {
                                     allocatedDate = DateTime.Now.ToString("yyMMdd");
-                                    using (SqlCommand sqlCommandQuery = new SqlCommand(sqlCommandInsert, connection))
+                                    using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlCommandInsert, connection))
                                     {
-                                        sqlCommandQuery.Parameters.AddWithValue("@SYSKEY", "01");
-                                        sqlCommandQuery.Parameters.AddWithValue("@ALOCATEDATE", allocatedDate);
-                                        sqlCommandQuery.Parameters.AddWithValue("@SEQNO", 2);
+                                        sqlCommandQuery.CommandType = CommandType.Text;
+                                        sqlCommandQuery.Parameters.AddWithValue("?", "01");
+                                        sqlCommandQuery.Parameters.AddWithValue("?", allocatedDate);
+                                        sqlCommandQuery.Parameters.AddWithValue("?", 2);
                                         sqlCommandQuery.ExecuteNonQuery();
                                         useqno = "0001";
                                     }
                                 }
-                                catch (SqlException)
+                                catch (OleDbException)
                                 {
                                     MainWindow.AlarmBox("Can not connect to the database !!!");
                                 }
@@ -270,53 +275,54 @@ namespace ChipbankImport
             string sqlInsert = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, OUTDIV," +
                                " RECDIV, STOCKDATE, WFCOUNT, CHIPCOUNT, SLIPNO, SLIPNOEDA, ORDERNO, INVOICENO, HOLDFLAG, CASENO, DELETEFLAG, WFDATA1, WFDATA2, WFINPUT, " +
                                "TIMESTAMP, RFSEQNO) " +
-                               "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @OUTDIV, @RECDIV, @STOCKDATE, @WFCOUNT, " +
-                               "@CHIPCOUNT, @SLIPNO, @SLIPNOEDA, @ORDERNO, @INVOICENo, @HOLDFLAG, @CASENO, @DELETEFLAG, @tmpdata1, @tmpdata2, @WFINPUT, @TIMESTAMP, @RF_SEQNO)";
-            string sqlUpdate = "UPDATE CHIPNYUKO SET PLASMA = (SELECT PLASMA FROM CHIPMASTER Where CHIPMODELNAME = @CHIPMODELNAME AND PLASMA = '1') " +
-                               "WHERE WFLOTNO = @WFLOTNO AND SEQNO = @finseqno";
-            using (SqlConnection connection = new SqlConnection(ConnetionString))
+                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            string sqlUpdate = "UPDATE CHIPNYUKO SET PLASMA = (SELECT PLASMA FROM CHIPMASTER Where CHIPMODELNAME = ? AND PLASMA = '1') " +
+                               "WHERE WFLOTNO = ? AND SEQNO = ?";
+            using (OleDbConnection connection = new OleDbConnection(ConnetionString))
             {
                 try
                 {
                     connection.Open();
-                    SqlCommand sqlCommandQuery = new SqlCommand(sqlInsert, connection);
-                    sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
-                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE1", GetwaferData.ModelCode1);
-                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE2", GetwaferData.ModelCode2);
-                    sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
-                    sqlCommandQuery.Parameters.AddWithValue("@SEQNO", finseqno);
-                    sqlCommandQuery.Parameters.AddWithValue("@OUTDIV", GetwaferData.OutDiv);
-                    sqlCommandQuery.Parameters.AddWithValue("@RECDIV", GetwaferData.RecDiv);
-                    sqlCommandQuery.Parameters.AddWithValue("@STOCKDATE", STOCKDATE);
-                    sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT", GetwaferData.WFCount);
-                    sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", GetwaferData.ChipCount);
-                    sqlCommandQuery.Parameters.AddWithValue("@SLIPNO", "          ");
-                    sqlCommandQuery.Parameters.AddWithValue("@SLIPNOEDA", "  ");
-                    sqlCommandQuery.Parameters.AddWithValue("@ORDERNO", GetwaferData.OrderNo);
-                    sqlCommandQuery.Parameters.AddWithValue("@INVOICENo", GetwaferData.InvoiceNo);
-                    sqlCommandQuery.Parameters.AddWithValue("@HOLDFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@CASENO", GetwaferData.CaseNo);
-                    sqlCommandQuery.Parameters.AddWithValue("@DELETEFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@tmpdata1", ReWFDATA1);
-                    sqlCommandQuery.Parameters.AddWithValue("@tmpdata2", ReWFDATA2);
-                    sqlCommandQuery.Parameters.AddWithValue("@WFINPUT", "1");
-                    sqlCommandQuery.Parameters.AddWithValue("@TIMESTAMP", TIMESTAMP);
-                    sqlCommandQuery.Parameters.AddWithValue("@RF_SEQNO", GetwaferData.RFSeqNo);
+                    OleDbCommand sqlCommandQuery = new OleDbCommand(sqlInsert, connection);
+                    sqlCommandQuery.CommandType = CommandType.Text;
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ChipModelName);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ModelCode1);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ModelCode2);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.WFLotNo);
+                    sqlCommandQuery.Parameters.AddWithValue("?", finseqno);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.OutDiv);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.RecDiv);
+                    sqlCommandQuery.Parameters.AddWithValue("?", STOCKDATE);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.WFCount);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ChipCount);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "          ");
+                    sqlCommandQuery.Parameters.AddWithValue("?", "  ");
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.OrderNo);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.InvoiceNo);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.CaseNo);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", ReWFDATA1);
+                    sqlCommandQuery.Parameters.AddWithValue("?", ReWFDATA2);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "1");
+                    sqlCommandQuery.Parameters.AddWithValue("?", TIMESTAMP);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.RFSeqNo);
                     sqlCommandQuery.ExecuteNonQuery();
                 }
-                catch (SqlException)
+                catch (OleDbException)
                 {
                     MainWindow.AlarmBox("Can not insert data or connect to the database !!!");
                 }
                 try
                 {
-                    SqlCommand sqlCommandQueryUpdate = new SqlCommand(sqlUpdate, connection);
-                    sqlCommandQueryUpdate.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
-                    sqlCommandQueryUpdate.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
-                    sqlCommandQueryUpdate.Parameters.AddWithValue("@finseqno", finseqno);
+                    OleDbCommand sqlCommandQueryUpdate = new OleDbCommand(sqlUpdate, connection);
+                    sqlCommandQueryUpdate.CommandType = CommandType.Text;
+                    sqlCommandQueryUpdate.Parameters.AddWithValue("?", GetwaferData.ChipModelName);
+                    sqlCommandQueryUpdate.Parameters.AddWithValue("?", GetwaferData.WFLotNo);
+                    sqlCommandQueryUpdate.Parameters.AddWithValue("?", finseqno);
                     sqlCommandQueryUpdate.ExecuteNonQuery();
                 }
-                catch (SqlException)
+                catch (OleDbException)
                 {
                     MainWindow.AlarmBox("Can not update data or connect to the database !!!");
                 }
@@ -331,35 +337,35 @@ namespace ChipbankImport
                 string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
                 string sqlInsert = "INSERT INTO CHIPZAIKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, LOCATION, WFCOUNT, CHIPCOUNT, STOCKDATE, " +
                                    "RETURNFLAG, REMAINFLAG, HOLDFLAG, STAFFNO, PREOUTFLAG, INVOICENO, PROCESSCODE, DELETEFLAG, TIMESTAMP)" +
-                                   "VALUES (@CHIPMODELNAME, @MODELCODE1, @MODELCODE2, @WFLOTNO, @SEQNO, @ENO, @LOCATION, @WFCOUNT, @CHIPCOUNT, @STOCKDATE, " +
-                                   "@RETURNFLAG, @REMAINFLAG, @HOLDFLAG, @STAFFNO, @PREOUTFLAG, @INVOICENO, @PROCESSCODE, @DELETEFLAG, @TIMESTAMP)";
-                using (SqlConnection connection = new SqlConnection(ConnectionString))
+                                   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                using (OleDbConnection connection = new OleDbConnection(ConnectionString))
                 {
                     connection.Open();
-                    SqlCommand sqlCommandQuery = new SqlCommand(sqlInsert, connection);
-                    sqlCommandQuery.Parameters.AddWithValue("@CHIPMODELNAME", GetwaferData.ChipModelName);
-                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE1", GetwaferData.ModelCode1);
-                    sqlCommandQuery.Parameters.AddWithValue("@MODELCODE2", GetwaferData.ModelCode2);
-                    sqlCommandQuery.Parameters.AddWithValue("@WFLOTNO", GetwaferData.WFLotNo);
-                    sqlCommandQuery.Parameters.AddWithValue("@SEQNO", finseqno);
-                    sqlCommandQuery.Parameters.AddWithValue("@ENO", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@LOCATION", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@WFCOUNT", GetwaferData.WFCount);
-                    sqlCommandQuery.Parameters.AddWithValue("@CHIPCOUNT", GetwaferData.ChipCount);
-                    sqlCommandQuery.Parameters.AddWithValue("@STOCKDATE", STOCKDATE);
-                    sqlCommandQuery.Parameters.AddWithValue("@RETURNFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@REMAINFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@HOLDFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@STAFFNO", "00001");
-                    sqlCommandQuery.Parameters.AddWithValue("@PREOUTFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@INVOICENO", GetwaferData.InvoiceNo);
-                    sqlCommandQuery.Parameters.AddWithValue("@PROCESSCODE", GetwaferData.RecDiv);
-                    sqlCommandQuery.Parameters.AddWithValue("@DELETEFLAG", "");
-                    sqlCommandQuery.Parameters.AddWithValue("@TIMESTAMP", TIMESTAMP);
+                    OleDbCommand sqlCommandQuery = new OleDbCommand(sqlInsert, connection);
+                    sqlCommandQuery.CommandType = CommandType.Text;
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ChipModelName);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ModelCode1);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ModelCode2);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.WFLotNo);
+                    sqlCommandQuery.Parameters.AddWithValue("?", finseqno);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.WFCount);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.ChipCount);
+                    sqlCommandQuery.Parameters.AddWithValue("?", STOCKDATE);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", "00001");
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.InvoiceNo);
+                    sqlCommandQuery.Parameters.AddWithValue("?", GetwaferData.RecDiv);
+                    sqlCommandQuery.Parameters.AddWithValue("?", "");
+                    sqlCommandQuery.Parameters.AddWithValue("?", TIMESTAMP);
                     sqlCommandQuery.ExecuteNonQuery();
                 }
             }
-            catch (SqlException)
+            catch (OleDbException)
             {
                 MainWindow.AlarmBox("Can not insert data or connect to the database !!!");
             }
@@ -416,13 +422,14 @@ namespace ChipbankImport
                 else
                 {
                     string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-                    using (SqlConnection connection = new SqlConnection(ConnectionString))
+                    using (OleDbConnection connection = new OleDbConnection(ConnectionString))
                     {
                         connection.Open();
-                        using (SqlCommand sqlCommand = new SqlCommand("SELECT INVOICENO FROM CHIPZAIKO where INVOICENO = @_InvoiceNo order by TIMESTAMP desc", connection))
+                        using (OleDbCommand sqlCommand = new OleDbCommand("SELECT INVOICENO FROM CHIPZAIKO where INVOICENO = ? order by TIMESTAMP desc", connection))
                         {
-                            sqlCommand.Parameters.AddWithValue("@_InvoiceNo", _InvoiceNo);
-                            using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                            sqlCommand.CommandType = CommandType.Text;
+                            sqlCommand.Parameters.AddWithValue("?", _InvoiceNo);
+                            using (OleDbDataReader reader = sqlCommand.ExecuteReader())
                             {
                                 if (reader.HasRows)
                                 {
