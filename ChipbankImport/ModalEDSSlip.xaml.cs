@@ -63,11 +63,17 @@ namespace ChipbankImport
         {
             if (isButtoncheckClicked)
             {
-                UpdateChipnyuko();
-                UpdateChipzaiko();
-                MoveFile(fileName!);
-                MainWindow.AlarmBox("Uploaded Successfully");
-                Close();
+                if (getlotStatus == "Sample")
+                {
+                    MoveFile(fileName!);
+                }
+                else
+                {
+                    UpdateChipnyuko();
+                    UpdateChipzaiko();
+                    MoveFile(fileName!);
+                    Close();
+                }
             }
             else
             {
@@ -615,10 +621,11 @@ namespace ChipbankImport
                 {
                     ZipFile.ExtractToDirectory(FileToCopy, ExtractPath + LotNo);
                     File.Move(FileToCopy, destinationFilePath + ".bak", true);
+                    MainWindow.AlarmBox("Uploaded Successfully");
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    MainWindow.AlarmBox("Not found zip file in the CBOutput location !!!");
+                    MainWindow.AlarmBox(e.Message);
                 }
             }
             else

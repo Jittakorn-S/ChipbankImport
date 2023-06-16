@@ -334,7 +334,5 @@ namespace ChipbankImport
             ModalCondition.textContent.Content = textMessage;
             ModalCondition.ShowDialog();
         }
-
-
     }
 }

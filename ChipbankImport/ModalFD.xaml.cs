@@ -168,7 +168,6 @@ namespace ChipbankImport
                     break;
                 }
             }
-
             resultTmpData = stringBuilder.ToString();
         }
         public static void SetSeq()
