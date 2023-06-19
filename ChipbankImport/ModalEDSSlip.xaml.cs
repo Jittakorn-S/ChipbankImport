@@ -66,6 +66,7 @@ namespace ChipbankImport
                 if (getlotStatus == "Sample")
                 {
                     MoveFile(fileName!);
+                    Close();
                 }
                 else
                 {
@@ -98,6 +99,13 @@ namespace ChipbankImport
                         OleDbCommand sqlCommandTMP_EDS = new OleDbCommand(sqlDeleteTMP_EDS, connection);
                         sqlCommandTMP_EDS.ExecuteNonQuery();
                     }
+                }
+                catch (SqlException exsql)
+                {
+                    MainWindow.AlarmBox(exsql.Message);
+                }
+                try
+                {
                     fileName = $"{waferText}.{zipfileName}.zip";
                     Unzip(fileName);
                     ShowValues();

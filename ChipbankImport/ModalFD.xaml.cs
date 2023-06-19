@@ -217,6 +217,7 @@ namespace ChipbankImport
                                             1 => "000" + seqNo.ToString(),
                                             _ => useqno
                                         };
+
                                         seqNo++;
 
                                         using (OleDbCommand sqlCommandUpdate = new OleDbCommand("UPDATE CHIPSYS " +
