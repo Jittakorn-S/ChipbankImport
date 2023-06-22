@@ -15,23 +15,27 @@ namespace ChipbankImport
 {
     public partial class ModalEDSSlip : Window
     {
-        public string? zipfileName { get; set; } //from submitButton_Click MainWindow
-        public bool checkwaferFail { get; set; } //from ModalDataWafer
-        private string? fileName;
-        private static string? tmpData;
-        private static string? tmpwfLotno;
-        private static string? tmp_invoiceNo;
-        private static string? tmp_ChipmodelName;
-        private static string? waferChipcount;
+        private static DataTable dataWFSEQ = new DataTable();
+        private static StringBuilder stringBuilder = new StringBuilder();
+        private static bool checkHasrowsNyuko;
+        private static bool checkHasrowsZaiko;
+        private static bool isButtoncheckClicked { get; set; }
+        private static int sumchipCount;
+        private static int sumwfCount;
+        private static string? checkWFLOTNOzaiko;
+        private static string? checkWFLOTNOnyuko;
+        private static string? finseqno;
         private static string? getlotStatus;
         private static string? getplasmaStatus;
-        private static string? finseqno;
-        private static int sumwfCount;
-        private static int sumchipCount;
-        private static DataTable dataWFSEQ = new DataTable();
-        private static bool isButtoncheckClicked { get; set; }
         private static string? resultTmpData;
-        private static StringBuilder stringBuilder = new StringBuilder();
+        private static string? tmpData;
+        private static string? tmp_ChipmodelName;
+        private static string? tmp_invoiceNo;
+        private static string? tmpwfLotno;
+        private static string? waferChipcount;
+        private string? fileName;
+        public bool checkwaferFail { get; set; } //from ModalDataWafer
+        public string? zipfileName { get; set; } //from submitButton_Click MainWindow
 
         public ModalEDSSlip()
         {
@@ -72,8 +76,16 @@ namespace ChipbankImport
                 {
                     UpdateChipnyuko();
                     UpdateChipzaiko();
-                    MoveFile(fileName!);
-                    Close();
+                    if (checkHasrowsNyuko || checkHasrowsZaiko)
+                    {
+                        MainWindow.AlarmBox("Found data in the database Please check !!!");
+                        Close();
+                    }
+                    else
+                    {
+                        MoveFile(fileName!);
+                        Close();
+                    }
                 }
             }
             else
@@ -387,7 +399,10 @@ namespace ChipbankImport
                     TMP_ORDERNO = tmpwfLotno;
                 }
 
-                SetSeq();
+                if (getlotStatus != "Sample")
+                {
+                    SetSeq();
+                }
 
                 string sqlInsertTMP_EDS = "INSERT INTO TMP_EDS (CHIPMODELNAME,WFLOTNO,WFCOUNT,CHIPCOUNT,INVOICENO,CASENO,OUTDIV,RECDIV,ORDERNO,PLASMA,WFDATA1,WFDATA2,SEQNO,WFCOUNT_FAIL) Values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -445,12 +460,24 @@ namespace ChipbankImport
         }
         private void SetInvoiceValues()
         {
-            invoiceNo.Text = tmp_invoiceNo;
-            chipModel.Text = tmp_ChipmodelName;
-            waferCount.Text = sumwfCount.ToString();
-            chipCount.Text = sumchipCount.ToString();
-            lotStatus.Text = getlotStatus;
-            seqNo.Text = finseqno;
+            if (getlotStatus == "Sample")
+            {
+                invoiceNo.Text = tmp_invoiceNo;
+                chipModel.Text = tmp_ChipmodelName;
+                waferCount.Text = sumwfCount.ToString();
+                chipCount.Text = sumchipCount.ToString();
+                lotStatus.Text = getlotStatus;
+                seqNo.Text = "No Data";
+            }
+            else
+            {
+                invoiceNo.Text = tmp_invoiceNo;
+                chipModel.Text = tmp_ChipmodelName;
+                waferCount.Text = sumwfCount.ToString();
+                chipCount.Text = sumchipCount.ToString();
+                lotStatus.Text = getlotStatus;
+                seqNo.Text = finseqno;
+            }
         }
         private void SetPlasmaStatus()
         {
@@ -490,127 +517,205 @@ namespace ChipbankImport
         }
         private static void UpdateChipnyuko()
         {
+            checkHasrowsNyuko = false;
+            checkWFLOTNOnyuko = null;
             string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-            string sqlSelectTMPEDS = "SELECT* FROM TMP_EDS";
+            string sqlSelectChipnyuko = "SELECT WFLOTNO FROM CHIPNYUKO WHERE WFLOTNO = (?)";
+
+            string sqlSelectCheckTMPEDS = "SELECT * FROM TMP_EDS";
             using (OleDbConnection connection = new OleDbConnection(ConnectionString))
             {
                 connection.Open();
-                using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectTMPEDS, connection))
+                using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectCheckTMPEDS, connection))
                 {
                     OleDbDataReader reader = sqlCommandQuery.ExecuteReader();
                     while (reader.Read())
                     {
-                        string CHIPMODELNAME = reader.GetString(0);
-                        string WFLOTNO = reader.GetString(1);
-                        int WFCOUNT = (int)reader.GetDecimal(2);
-                        int CHIPCOUNT = (int)reader.GetDecimal(3);
-                        string INVOICENO = reader.GetString(4);
-                        string CASENO = reader.GetString(5);
-                        string OUTDIV = reader.GetString(6);
-                        string RECDIV = reader.GetString(7);
-                        string ORDERNO = reader.GetString(8);
-                        string WFDATA1 = reader.GetString(9);
-                        string WFDATA2 = reader.GetString(10);
-                        string SEQNO = reader.GetString(11);
-                        string PLASMA = reader.GetString(12);
-                        int WFCOUNT_FAIL = (int)reader.GetDecimal(13);
-
-                        string insertQuery = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, RFSEQNO, OUTDIV, RECDIV, STOCKDATE, RETURNFLAG, WFCOUNT,CHIPCOUNT, " +
-                                             "ORDERNO, HIGHREL, AGARIDATE, BUNKAN, RETURNCLASS, SLIPNO, SLIPNOEDA,STAFFNO, WFINPUT, TESTERNO, PROGRAMVER,RECYCLE, RINGNO, INVOICENO, HOLDFLAG,CASENO, " +
-                                             "DIRECTCLASS, DELETEFLAG, WFDATA1, WFDATA2, TIMESTAMP, MOVE_ORDERNO, PLASMA,WFCOUNT_FAIL) " +
-                                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                        using (OleDbCommand insertCommand = new OleDbCommand(insertQuery, connection))
-                        {
-                            insertCommand.CommandType = CommandType.Text;
-                            insertCommand.Parameters.AddWithValue("?", CHIPMODELNAME);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", WFLOTNO);
-                            insertCommand.Parameters.AddWithValue("?", SEQNO);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", OUTDIV);
-                            insertCommand.Parameters.AddWithValue("?", RECDIV);
-                            insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString("yyMMdd"));
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", WFCOUNT);
-                            insertCommand.Parameters.AddWithValue("?", CHIPCOUNT);
-                            insertCommand.Parameters.AddWithValue("?", ORDERNO);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString("yyMMdd"));
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "001");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", INVOICENO);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", CASENO);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", WFDATA1);
-                            insertCommand.Parameters.AddWithValue("?", WFDATA2);
-                            insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString());
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", PLASMA);
-                            insertCommand.Parameters.AddWithValue("?", WFCOUNT_FAIL);
-                            insertCommand.ExecuteNonQuery();
-                        }
+                        checkWFLOTNOnyuko = reader.GetString(1);
                     }
                     reader.Close();
+                }
+            }
+
+            using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+            {
+                connection.Open();
+                using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectChipnyuko, connection))
+                {
+                    sqlCommandQuery.CommandType = CommandType.Text;
+                    sqlCommandQuery.Parameters.AddWithValue("?", checkWFLOTNOnyuko);
+                    OleDbDataReader reader = sqlCommandQuery.ExecuteReader();
+                    checkHasrowsNyuko = reader.HasRows;
+                    reader.Close();
+                }
+            }
+
+            if (checkHasrowsNyuko)
+            {
+                return;
+            }
+            else
+            {
+                string sqlSelectTMPEDS = "SELECT * FROM TMP_EDS";
+                using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+                {
+                    connection.Open();
+                    using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectTMPEDS, connection))
+                    {
+                        OleDbDataReader reader = sqlCommandQuery.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            string CHIPMODELNAME = reader.GetString(0);
+                            string WFLOTNO = reader.GetString(1);
+                            int WFCOUNT = (int)reader.GetDecimal(2);
+                            int CHIPCOUNT = (int)reader.GetDecimal(3);
+                            string INVOICENO = reader.GetString(4);
+                            string CASENO = reader.GetString(5);
+                            string OUTDIV = reader.GetString(6);
+                            string RECDIV = reader.GetString(7);
+                            string ORDERNO = reader.GetString(8);
+                            string WFDATA1 = reader.GetString(9);
+                            string WFDATA2 = reader.GetString(10);
+                            string SEQNO = reader.GetString(11);
+                            string PLASMA = reader.GetString(12);
+                            int WFCOUNT_FAIL = (int)reader.GetDecimal(13);
+
+                            string insertQuery = "INSERT INTO CHIPNYUKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, RFSEQNO, OUTDIV, RECDIV, STOCKDATE, RETURNFLAG, WFCOUNT,CHIPCOUNT, " +
+                                                 "ORDERNO, HIGHREL, AGARIDATE, BUNKAN, RETURNCLASS, SLIPNO, SLIPNOEDA,STAFFNO, WFINPUT, TESTERNO, PROGRAMVER,RECYCLE, RINGNO, INVOICENO, HOLDFLAG,CASENO, " +
+                                                 "DIRECTCLASS, DELETEFLAG, WFDATA1, WFDATA2, TIMESTAMP, MOVE_ORDERNO, PLASMA,WFCOUNT_FAIL) " +
+                                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            using (OleDbCommand insertCommand = new OleDbCommand(insertQuery, connection))
+                            {
+                                insertCommand.CommandType = CommandType.Text;
+                                insertCommand.Parameters.AddWithValue("?", CHIPMODELNAME);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", WFLOTNO);
+                                insertCommand.Parameters.AddWithValue("?", SEQNO);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", OUTDIV);
+                                insertCommand.Parameters.AddWithValue("?", RECDIV);
+                                insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString("yyMMdd"));
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", WFCOUNT);
+                                insertCommand.Parameters.AddWithValue("?", CHIPCOUNT);
+                                insertCommand.Parameters.AddWithValue("?", ORDERNO);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString("yyMMdd"));
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "001");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", INVOICENO);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", CASENO);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", WFDATA1);
+                                insertCommand.Parameters.AddWithValue("?", WFDATA2);
+                                insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString());
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", PLASMA);
+                                insertCommand.Parameters.AddWithValue("?", WFCOUNT_FAIL);
+                                insertCommand.ExecuteNonQuery();
+                            }
+                        }
+                        reader.Close();
+                    }
                 }
             }
         }
         private static void UpdateChipzaiko()
         {
+            checkHasrowsZaiko = false;
+            checkWFLOTNOzaiko = null;
             string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-            string sqlSelectTMPEDS = "SELECT* FROM TMP_EDS";
+            string sqlSelectChipzaiko = "SELECT WFLOTNO FROM CHIPZAIKO WHERE WFLOTNO = (?)";
+
+            string sqlSelectCheckTMPEDS = "SELECT * FROM TMP_EDS";
             using (OleDbConnection connection = new OleDbConnection(ConnectionString))
             {
                 connection.Open();
-                using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectTMPEDS, connection))
+                using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectCheckTMPEDS, connection))
                 {
                     OleDbDataReader reader = sqlCommandQuery.ExecuteReader();
                     while (reader.Read())
                     {
-                        string CHIPMODELNAME = reader.GetString(0);
-                        string WFLOTNO = reader.GetString(1);
-                        int WFCOUNT = (int)reader.GetDecimal(2);
-                        int CHIPCOUNT = (int)reader.GetDecimal(3);
-                        string SEQNO = reader.GetString(11);
-                        string insertQuery = "INSERT INTO CHIPZAIKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, LOCATION, WFCOUNT, CHIPCOUNT, STOCKDATE, RETURNFLAG, REMAINFLAG, HOLDFLAG, STAFFNO, PREOUTFLAG, INVOICENO, PROCESSCODE, DELETEFLAG, TIMESTAMP) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                        using (OleDbCommand insertCommand = new OleDbCommand(insertQuery, connection))
-                        {
-                            insertCommand.CommandType = CommandType.Text;
-                            insertCommand.Parameters.AddWithValue("?", CHIPMODELNAME);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", WFLOTNO);
-                            insertCommand.Parameters.AddWithValue("?", SEQNO);
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", WFCOUNT);
-                            insertCommand.Parameters.AddWithValue("?", CHIPCOUNT);
-                            insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString("yyMMdd"));
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "001");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", "TI970");
-                            insertCommand.Parameters.AddWithValue("?", "");
-                            insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString());
-                            insertCommand.ExecuteNonQuery();
-                        }
+                        checkWFLOTNOzaiko = reader.GetString(1);
                     }
                     reader.Close();
+                }
+            }
+
+            using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+            {
+                connection.Open();
+                using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectChipzaiko, connection))
+                {
+                    sqlCommandQuery.CommandType = CommandType.Text;
+                    sqlCommandQuery.Parameters.AddWithValue("?", checkWFLOTNOzaiko);
+                    OleDbDataReader reader = sqlCommandQuery.ExecuteReader();
+                    checkHasrowsZaiko = reader.HasRows;
+                    reader.Close();
+                }
+            }
+
+            if (checkHasrowsZaiko)
+            {
+                return;
+            }
+            else
+            {
+                string sqlSelectTMPEDS = "SELECT * FROM TMP_EDS";
+                using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+                {
+                    connection.Open();
+                    using (OleDbCommand sqlCommandQuery = new OleDbCommand(sqlSelectTMPEDS, connection))
+                    {
+                        OleDbDataReader reader = sqlCommandQuery.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            string CHIPMODELNAME = reader.GetString(0);
+                            string WFLOTNO = reader.GetString(1);
+                            int WFCOUNT = (int)reader.GetDecimal(2);
+                            int CHIPCOUNT = (int)reader.GetDecimal(3);
+                            string SEQNO = reader.GetString(11);
+                            string insertQuery = "INSERT INTO CHIPZAIKO (CHIPMODELNAME, MODELCODE1, MODELCODE2, WFLOTNO, SEQNO, ENO, LOCATION, WFCOUNT, CHIPCOUNT, STOCKDATE, RETURNFLAG, REMAINFLAG, HOLDFLAG, STAFFNO, PREOUTFLAG, INVOICENO, PROCESSCODE, DELETEFLAG, TIMESTAMP) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            using (OleDbCommand insertCommand = new OleDbCommand(insertQuery, connection))
+                            {
+                                insertCommand.CommandType = CommandType.Text;
+                                insertCommand.Parameters.AddWithValue("?", CHIPMODELNAME);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", WFLOTNO);
+                                insertCommand.Parameters.AddWithValue("?", SEQNO);
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", WFCOUNT);
+                                insertCommand.Parameters.AddWithValue("?", CHIPCOUNT);
+                                insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString("yyMMdd"));
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "001");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", "TI970");
+                                insertCommand.Parameters.AddWithValue("?", "");
+                                insertCommand.Parameters.AddWithValue("?", DateTime.Now.ToString());
+                                insertCommand.ExecuteNonQuery();
+                            }
+                        }
+                        reader.Close();
+                    }
                 }
             }
         }
