@@ -170,7 +170,7 @@ namespace ChipbankImport
             }
             resultTmpData = stringBuilder.ToString();
         }
-        public static void SetSeq()
+        public static string SetSeq(string setseq)
         {
             try
             {
@@ -180,10 +180,8 @@ namespace ChipbankImport
                 using (OleDbConnection connection = new OleDbConnection(connectionString))
                 {
                     connection.Open();
-                    using (OleDbCommand sqlCommand = new OleDbCommand("SELECT * FROM CHIPSYS WHERE SYSKEY = ?", connection))
+                    using (OleDbCommand sqlCommand = new OleDbCommand("SELECT * FROM CHIPSYS WHERE SYSKEY = '01'", connection))
                     {
-                        sqlCommand.CommandType = CommandType.Text;
-                        sqlCommand.Parameters.AddWithValue("?", "01");
                         using (OleDbDataReader reader = sqlCommand.ExecuteReader())
                         {
                             if (reader.HasRows)
@@ -261,6 +259,7 @@ namespace ChipbankImport
             {
                 MainWindow.AlarmBox(e.Message);
             }
+            return finseqno!;
         }
 
         public static void STOCKINDATA(WaferData GetwaferData)
@@ -413,7 +412,7 @@ namespace ChipbankImport
                     MainWindow.AlarmConditionBox("Confirm Upload ?");
                     if (ModalCondition.setIsyes)
                     {
-                        SetSeq();
+                        SetSeq("");
                         UploadDataFDSheet();
                         MainWindow.AlarmBox("Upload Successfully");
                         Close();
@@ -438,7 +437,7 @@ namespace ChipbankImport
                                 }
                                 else
                                 {
-                                    SetSeq();
+                                    SetSeq("");
                                     UploadDataFDSheet();
                                     MainWindow.AlarmBox("Upload Successfully");
                                     Close();

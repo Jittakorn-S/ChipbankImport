@@ -24,7 +24,7 @@ namespace ChipbankImport
         private static int sumwfCount;
         private static string? checkWFLOTNOzaiko;
         private static string? checkWFLOTNOnyuko;
-        private static string? finseqno;
+
         private static string? getlotStatus;
         private static string? getplasmaStatus;
         private static string? resultTmpData;
@@ -33,7 +33,8 @@ namespace ChipbankImport
         private static string? tmp_invoiceNo;
         private static string? tmpwfLotno;
         private static string? waferChipcount;
-        private string? fileName;
+        private static string? fileName;
+        private static string? getfinseqno;
         public bool checkwaferFail { get; set; } //from ModalDataWafer
         public string? zipfileName { get; set; } //from submitButton_Click MainWindow
 
@@ -56,6 +57,7 @@ namespace ChipbankImport
                 DragMove();
             }
         }
+
         private void waferLot_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -63,6 +65,7 @@ namespace ChipbankImport
                 checkButton_Click(sender, e);
             }
         }
+
         private void UploadButton_Click(object sender, RoutedEventArgs e)
         {
             if (isButtoncheckClicked)
@@ -93,6 +96,7 @@ namespace ChipbankImport
                 MainWindow.AlarmBox("Please click the check button first !!!");
             }
         }
+
         private void checkButton_Click(object sender, RoutedEventArgs e)
         {
             string waferText = waferLot.Text.ToString().Trim('.');
@@ -137,24 +141,23 @@ namespace ChipbankImport
         }
         public static void Unzip(string FileName)
         {
-            int countLine = 1;
+            getplasmaStatus = null;
+            int WFSEQ;
             int line = 0;
             int wfcountFail = 0;
-            int WFSEQ;
-            sumchipCount = 0;
-            sumwfCount = 0;
-            string? tmpData1 = null;
-            string? tmpData2 = null;
-            getplasmaStatus = null;
-            tmpData = null;
-            string? TMP_ORDERNO = null;
-            finseqno = null;
             resultTmpData = null;
+            string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+            string? ChangeDirectory = ConfigurationManager.AppSettings["ChangeDirectory"]!;
             string? FileToCopy = ConfigurationManager.AppSettings["CBOutputPath"] + FileName; /*Shared Folder*/
             string? NewCopyCB = ConfigurationManager.AppSettings["NewCopyCBPath"]!; /*for backup file before sending*/
             string? ProcessPath = ConfigurationManager.AppSettings["ProcessPath"]!;
-            string? ChangeDirectory = ConfigurationManager.AppSettings["ChangeDirectory"]!;
-            string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+            string? TMP_ORDERNO = null;
+            string? tmpData1 = null;
+            string? tmpData2 = null;
+            sumchipCount = 0;
+            sumwfCount = 0;
+            tmpData = null;
+            int countLine = 1;
 
             if (Directory.Exists(ProcessPath))
             {
@@ -311,7 +314,6 @@ namespace ChipbankImport
                     }
                 }
 
-                ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
                 string ConnetionStringMapOnline = ConfigurationManager.AppSettings["ConnetionStringMapOnline"]!;
                 string sqlSelectWFSEQ = "SELECT WFSEQ, CHIPCOUNT FROM WF_EDS ORDER BY WFSEQ";
                 string sqlSelectCHIPMASTER = "SELECT * FROM CHIPMASTER WHERE CHIPMODELNAME = (?)";
@@ -401,35 +403,30 @@ namespace ChipbankImport
 
                 if (getlotStatus != "Sample")
                 {
-                    SetSeq();
-                }
-
-                string sqlInsertTMP_EDS = "INSERT INTO TMP_EDS (CHIPMODELNAME,WFLOTNO,WFCOUNT,CHIPCOUNT,INVOICENO,CASENO,OUTDIV,RECDIV,ORDERNO,PLASMA,WFDATA1,WFDATA2,SEQNO,WFCOUNT_FAIL) Values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-                string ALOCATEDATE = DateTime.Now.ToString("yyMMdd");
-                string useqno = "0001";
-                finseqno = $"Q{ALOCATEDATE!.Substring(1, 5)}{useqno}";
-
-                using (OleDbConnection connection = new OleDbConnection(ConnectionString))
-                {
-                    connection.Open();
-                    OleDbCommand sqlCommandQuery = new OleDbCommand(sqlInsertTMP_EDS, connection);
-                    sqlCommandQuery.CommandType = CommandType.Text;
-                    sqlCommandQuery.Parameters.AddWithValue("?", tmp_ChipmodelName);
-                    sqlCommandQuery.Parameters.AddWithValue("?", tmpwfLotno);
-                    sqlCommandQuery.Parameters.AddWithValue("?", sumwfCount);
-                    sqlCommandQuery.Parameters.AddWithValue("?", sumchipCount);
-                    sqlCommandQuery.Parameters.AddWithValue("?", tmp_invoiceNo);
-                    sqlCommandQuery.Parameters.AddWithValue("?", TMP_CASENO);
-                    sqlCommandQuery.Parameters.AddWithValue("?", TMP_OUTDIV);
-                    sqlCommandQuery.Parameters.AddWithValue("?", TMP_RECDIV);
-                    sqlCommandQuery.Parameters.AddWithValue("?", TMP_ORDERNO);
-                    sqlCommandQuery.Parameters.AddWithValue("?", getplasmaStatus);
-                    sqlCommandQuery.Parameters.AddWithValue("?", tmpData1);
-                    sqlCommandQuery.Parameters.AddWithValue("?", tmpData2);
-                    sqlCommandQuery.Parameters.AddWithValue("?", finseqno);
-                    sqlCommandQuery.Parameters.AddWithValue("?", wfcountFail);
-                    sqlCommandQuery.ExecuteNonQuery();
+                    getfinseqno = null;
+                    getfinseqno = SetSeq("");
+                    string sqlInsertTMP_EDS = "INSERT INTO TMP_EDS (CHIPMODELNAME,WFLOTNO,WFCOUNT,CHIPCOUNT,INVOICENO,CASENO,OUTDIV,RECDIV,ORDERNO,PLASMA,WFDATA1,WFDATA2,SEQNO,WFCOUNT_FAIL) Values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+                    {
+                        connection.Open();
+                        OleDbCommand sqlCommandQuery = new OleDbCommand(sqlInsertTMP_EDS, connection);
+                        sqlCommandQuery.CommandType = CommandType.Text;
+                        sqlCommandQuery.Parameters.AddWithValue("?", tmp_ChipmodelName);
+                        sqlCommandQuery.Parameters.AddWithValue("?", tmpwfLotno);
+                        sqlCommandQuery.Parameters.AddWithValue("?", sumwfCount);
+                        sqlCommandQuery.Parameters.AddWithValue("?", sumchipCount);
+                        sqlCommandQuery.Parameters.AddWithValue("?", tmp_invoiceNo);
+                        sqlCommandQuery.Parameters.AddWithValue("?", TMP_CASENO);
+                        sqlCommandQuery.Parameters.AddWithValue("?", TMP_OUTDIV);
+                        sqlCommandQuery.Parameters.AddWithValue("?", TMP_RECDIV);
+                        sqlCommandQuery.Parameters.AddWithValue("?", TMP_ORDERNO);
+                        sqlCommandQuery.Parameters.AddWithValue("?", getplasmaStatus);
+                        sqlCommandQuery.Parameters.AddWithValue("?", tmpData1);
+                        sqlCommandQuery.Parameters.AddWithValue("?", tmpData2);
+                        sqlCommandQuery.Parameters.AddWithValue("?", getfinseqno);
+                        sqlCommandQuery.Parameters.AddWithValue("?", wfcountFail);
+                        sqlCommandQuery.ExecuteNonQuery();
+                    }
                 }
             }
             else
@@ -440,7 +437,7 @@ namespace ChipbankImport
 
         private void ShowValues()
         {
-            if (tmp_invoiceNo != null && finseqno != null)
+            if (tmp_invoiceNo != null && getfinseqno != null)
             {
                 SetInvoiceValues();
                 SetPlasmaStatus();
@@ -476,7 +473,7 @@ namespace ChipbankImport
                 waferCount.Text = sumwfCount.ToString();
                 chipCount.Text = sumchipCount.ToString();
                 lotStatus.Text = getlotStatus;
-                seqNo.Text = finseqno;
+                seqNo.Text = getfinseqno;
             }
         }
         private void SetPlasmaStatus()
