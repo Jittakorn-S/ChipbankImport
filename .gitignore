@@ -3,13 +3,19 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-*.config
+
 # User-specific files
 *.rsuser
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+App.config
+
+### DotnetCore ###
+# .NET Core build folders
+bin/
+obj/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
