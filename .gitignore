@@ -10,7 +10,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-App.config
+*.config
 
 ### DotnetCore ###
 # .NET Core build folders
