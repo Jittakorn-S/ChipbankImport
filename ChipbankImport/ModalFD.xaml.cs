@@ -107,6 +107,7 @@ namespace ChipbankImport
                                     WFCount = ReadlineTextFD.Substring(143, 2),
                                     ChipCount = ReadlineTextFD.Substring(145, 7),
                                 };
+                                SetSeq("");
                                 SetWafer(ReadlineTextFD);
                                 STOCKDATA(waferData);
                                 STOCKINDATA(waferData);
@@ -405,51 +406,69 @@ namespace ChipbankImport
         }
         private void UploadButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            bool checkChipzaiko = false;
+            bool checkChipnyoko = false;
+            if (_InvoiceNo == "        ")
             {
-                if (_InvoiceNo == "        ")
+                MainWindow.AlarmConditionBox("Confirm Upload ?");
+                if (ModalCondition.setIsyes)
                 {
-                    MainWindow.AlarmConditionBox("Confirm Upload ?");
-                    if (ModalCondition.setIsyes)
-                    {
-                        SetSeq("");
-                        UploadDataFDSheet();
-                        MainWindow.AlarmBox("Upload Successfully");
-                        Close();
-                    }
+                    UploadDataFDSheet();
+                    MainWindow.AlarmBox("Upload Successfully");
+                    Close();
                 }
-                else
+            }
+            else
+            {
+                string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+                using (OleDbConnection connection = new OleDbConnection(ConnectionString))
                 {
-                    string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
-                    using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+                    connection.Open();
+                    using (OleDbCommand sqlCommandCHIPZAIKO = new OleDbCommand("SELECT INVOICENO FROM CHIPZAIKO where INVOICENO = ? order by TIMESTAMP desc", connection))
                     {
-                        connection.Open();
-                        using (OleDbCommand sqlCommand = new OleDbCommand("SELECT INVOICENO FROM CHIPZAIKO where INVOICENO = ? order by TIMESTAMP desc", connection))
+                        sqlCommandCHIPZAIKO.CommandType = CommandType.Text;
+                        sqlCommandCHIPZAIKO.Parameters.AddWithValue("?", _InvoiceNo);
+                        using (OleDbDataReader reader = sqlCommandCHIPZAIKO.ExecuteReader())
                         {
-                            sqlCommand.CommandType = CommandType.Text;
-                            sqlCommand.Parameters.AddWithValue("?", _InvoiceNo);
-                            using (OleDbDataReader reader = sqlCommand.ExecuteReader())
+                            if (reader.HasRows)
                             {
-                                if (reader.HasRows)
-                                {
-                                    MainWindow.AlarmBox("This invoice has been uploaded, Please check !!!");
-                                    Close();
-                                }
-                                else
-                                {
-                                    SetSeq("");
-                                    UploadDataFDSheet();
-                                    MainWindow.AlarmBox("Upload Successfully");
-                                    Close();
-                                }
+                                checkChipzaiko = true;
+                            }
+                            else
+                            {
+                                checkChipzaiko = false;
+                            }
+                        }
+                    }
+                    using (OleDbCommand sqlCommandCHIPNYUKO = new OleDbCommand("SELECT INVOICENO FROM CHIPNYUKO WHERE INVOICENO = ? order by TIMESTAMP desc", connection))
+                    {
+                        sqlCommandCHIPNYUKO.CommandType = CommandType.Text;
+                        sqlCommandCHIPNYUKO.Parameters.AddWithValue("?", _InvoiceNo);
+                        using (OleDbDataReader reader = sqlCommandCHIPNYUKO.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                            {
+                                checkChipnyoko = true;
+                            }
+                            else
+                            {
+                                checkChipnyoko = false;
                             }
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MainWindow.AlarmBox(ex.Message);
+
+                if (checkChipzaiko || checkChipnyoko)
+                {
+                    MainWindow.AlarmBox("This invoice has been uploaded, Please check !!!");
+                    Close();
+                }
+                else
+                {
+                    UploadDataFDSheet();
+                    MainWindow.AlarmBox("Upload Successfully");
+                    Close();
+                }
             }
         }
     }
