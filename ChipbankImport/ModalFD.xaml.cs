@@ -19,6 +19,7 @@ namespace ChipbankImport
         private static string? useqno;
         private static string? finseqno;
         private static string? resultTmpData;
+        private bool checkNoInvoiceRows = false;
         public struct WaferData
         {
             public string ActualNo { get; set; }
@@ -77,6 +78,8 @@ namespace ChipbankImport
         }
         private void UploadDataFDSheet()
         {
+            bool checkChipzaiko = false;
+            bool checkChipnyoko = false;
             try
             {
                 string? ReadlineTextFD = null;
@@ -107,11 +110,60 @@ namespace ChipbankImport
                                     WFCount = ReadlineTextFD.Substring(143, 2),
                                     ChipCount = ReadlineTextFD.Substring(145, 7),
                                 };
-                                SetSeq("");
-                                SetWafer(ReadlineTextFD);
-                                STOCKDATA(waferData);
-                                STOCKINDATA(waferData);
-                                UnZipLot(waferData);
+
+                                string ConnectionString = ConfigurationManager.AppSettings["ConnetionStringDBRISTLSI"]!;
+                                using (OleDbConnection connection = new OleDbConnection(ConnectionString))
+                                {
+                                    connection.Open();
+                                    using (OleDbCommand sqlCommandCHIPZAIKO = new OleDbCommand("SELECT WFLOTNO FROM CHIPZAIKO WHERE WFLOTNO = ? order by TIMESTAMP desc", connection))
+                                    {
+                                        sqlCommandCHIPZAIKO.CommandType = CommandType.Text;
+                                        sqlCommandCHIPZAIKO.Parameters.AddWithValue("?", waferData.WFLotNo);
+                                        using (OleDbDataReader reader = sqlCommandCHIPZAIKO.ExecuteReader())
+                                        {
+                                            if (reader.HasRows)
+                                            {
+                                                checkChipzaiko = true;
+                                            }
+                                            else
+                                            {
+                                                checkChipzaiko = false;
+                                            }
+                                        }
+                                    }
+                                    using (OleDbCommand sqlCommandCHIPNYUKO = new OleDbCommand("SELECT WFLOTNO FROM CHIPNYUKO WHERE WFLOTNO = ? order by TIMESTAMP desc", connection))
+                                    {
+                                        sqlCommandCHIPNYUKO.CommandType = CommandType.Text;
+                                        sqlCommandCHIPNYUKO.Parameters.AddWithValue("?", waferData.WFLotNo);
+                                        using (OleDbDataReader reader = sqlCommandCHIPNYUKO.ExecuteReader())
+                                        {
+                                            if (reader.HasRows)
+                                            {
+                                                checkChipnyoko = true;
+                                            }
+                                            else
+                                            {
+                                                checkChipnyoko = false;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (checkChipzaiko || checkChipnyoko)
+                                {
+                                    MainWindow.AlarmBox("This LOT has been uploaded, Please check !!!");
+                                    Close();
+                                    checkNoInvoiceRows = true;
+                                    return;
+                                }
+                                else
+                                {
+                                    SetSeq("");
+                                    SetWafer(ReadlineTextFD);
+                                    STOCKDATA(waferData);
+                                    STOCKINDATA(waferData);
+                                    UnZipLot(waferData);
+                                }
                             }
                         }
                     }
@@ -414,8 +466,15 @@ namespace ChipbankImport
                 if (ModalCondition.setIsyes)
                 {
                     UploadDataFDSheet();
-                    MainWindow.AlarmBox("Upload Successfully");
-                    Close();
+                    if (checkNoInvoiceRows)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        MainWindow.AlarmBox("Upload Successfully");
+                        Close();
+                    }
                 }
             }
             else

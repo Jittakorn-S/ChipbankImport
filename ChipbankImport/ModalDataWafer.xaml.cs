@@ -40,9 +40,6 @@ namespace ChipbankImport
             string sqlselectCheckpcs = "SELECT InputLotNo, EndWaferPcs, EndChipPcs FROM EDSFlow WHERE InputLotNo = @tmpwfLotno AND FlowName = 'OUTPUT' AND FlagLastShipout = 1";
             using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
-                string? InputLotNo = null;
-                int EndWaferPcs = 0;
-                int EndChipPcs = 0;
                 connection.Open();
                 SqlCommand sqlCommandQuerypcs = new SqlCommand(sqlselectCheckpcs, connection);
                 sqlCommandQuerypcs.Parameters.AddWithValue("@tmpwfLotno", tmpwfLotno);
@@ -50,24 +47,11 @@ namespace ChipbankImport
                 {
                     if (readerQuerypcs.HasRows)
                     {
-                        while (readerQuerypcs.Read())
-                        {
-                            InputLotNo = readerQuerypcs.GetString(0);
-                            EndWaferPcs = readerQuerypcs.GetInt32(1);
-                            EndChipPcs = readerQuerypcs.GetInt32(2);
-                        }
-                        bool LotEqual = (InputLotNo == tmpwfLotno);
-                        bool WaferEqual = (EndWaferPcs == sumwfCount);
-                        bool ChipEqual = (EndChipPcs == sumchipCount);
-                        if (!LotEqual || !WaferEqual || !ChipEqual)
-                        {
-                            MainWindow.AlarmBox("Data is not correct please check !!!");
-                            checkwaferFail = true;
-                        }
+                        return;
                     }
                     else
                     {
-                        MainWindow.AlarmBox("Data is not correct please check !!!");
+                        MainWindow.AlarmBox("Not have data in the database please check !!!");
                         checkwaferFail = true;
                     }
                 }
