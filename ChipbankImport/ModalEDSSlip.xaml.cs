@@ -25,6 +25,7 @@ namespace ChipbankImport
         private static int sumwfCount;
         private static string? checkWFLOTNOzaiko;
         private static string? checkWFLOTNOnyuko;
+        private static string? checkLotName;
         private static string? getlotStatus;
         private static string? getplasmaStatus;
         private static string? resultTmpData;
@@ -136,7 +137,15 @@ namespace ChipbankImport
                 {
                     fileName = $"{waferText}.{zipfileName}.zip";
                     Unzip(fileName);
-                    ShowValues();
+                    if (checkLotName == null || checkLotName == "")
+                    {
+                        MainWindow.AlarmBox("Barcode Mismatch !!!");
+                        ClearInvoiceValues();
+                    }
+                    else
+                    {
+                        ShowValues();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -151,7 +160,7 @@ namespace ChipbankImport
                 UploadButton.IsEnabled = false;
             }
         }
-        public static void Unzip(string FileName)
+        public static string? Unzip(string FileName)
         {
             getplasmaStatus = null;
             int WFSEQ;
@@ -192,7 +201,7 @@ namespace ChipbankImport
                 catch (Exception)
                 {
                     MainWindow.AlarmBox("Please check the CBOutput location or the unzip file location !!!");
-                    return;
+                    return null;
                 }
 
                 Directory.SetCurrentDirectory(ChangeDirectory);
@@ -204,7 +213,7 @@ namespace ChipbankImport
                 catch
                 {
                     MainWindow.AlarmBox($"Please check zip file in the {ChangeDirectory} location !!!");
-                    return;
+                    return null;
                 }
 
                 string roblnCsvPath = Path.Combine(ProcessPath, "ROBIN_L.CSV");
@@ -227,7 +236,7 @@ namespace ChipbankImport
                 else
                 {
                     MainWindow.AlarmBox("Data not exist check ROBIN_L.CSV !!!");
-                    return;
+                    return null;
                 }
 
                 string cbInputPath = Path.Combine(ProcessPath, "CBinput.txt");
@@ -443,10 +452,12 @@ namespace ChipbankImport
                         sqlCommandQuery.ExecuteNonQuery();
                     }
                 }
+                return checkLotName = fileName;
             }
             else
             {
                 MainWindow.AlarmBox("Lot file zip not found, Please check !!!");
+                return checkLotName = "";
             }
         }
 
